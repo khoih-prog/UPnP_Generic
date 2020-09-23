@@ -11,14 +11,17 @@
 
 ### Why do we need this [UPnP_Generic library](https://github.com/khoih-prog/UPnP_Generic)
 
-  Many of us are **manually port-forwarding** in Internet Gateway Device (IGD, Router) in order to provide access to the local Web Services from the Internet.
-  This library provides the easier way to automatically port-forward by using the **Simple Service Discovery Protocol (SSDP)**, running on nRF52, SAMD21/SAMD51, STM32F/L/H/G/WB/MP1, Teensy, ESP8266/ESP32, using ESP WiFi, WiFiNINA, Ethernet W5x00, ESP8266/ESP32 AT-command WiFi supporting **UDP Multicast**.
-   
-  The [**Simple Service Discovery Protocol (SSDP)**](https://en.wikipedia.org/wiki/Simple_Service_Discovery_Protocol) is a network protocol based on the Internet protocol suite for **advertisement and discovery of network services and presence information**. It accomplishes this without assistance of server-based configuration mechanisms, such as Dynamic Host Configuration Protocol (DHCP) or Domain Name System (DNS), and without special static configuration of a network host. SSDP is the basis of the discovery protocol of **Universal Plug and Play (UPnP)** and is intended for use in residential or small office environments
-   
-  This Library is created to automatically **update your IGDs with the requested port-forward information**, using one of the many available boards / shields. See [Currently Supported Boards](https://github.com/khoih-prog/UPnP_Generic#currently-supported-boards).
+  Many of us are **manually port-forwarding** in Internet Gateway Device (IGD, Router) in order to provide access to local Web Services from the Internet.
   
-  The time between checks to update the UPnP Port Mappings is **configurable** to match your use case, and is set in the examples at 10 minutes. The LEASE_DURATION is also configurable and fefault at 10hrs (36000s). The Virtual Server Name cn also be specified in the sketch and is shown in the IGD, e.g. `NRF52-W5X00` or `ESP8266-WIFI` as in the following picture:
+  This library provides the easier way to automatically port-forward by using the [**Simple Service Discovery Protocol (SSDP)**](https://tools.ietf.org/html/draft-cai-ssdp-v1-03), running on nRF52, SAMD21/SAMD51, STM32F/L/H/G/WB/MP1, Teensy, ESP8266/ESP32, using ESP WiFi, WiFiNINA, Ethernet W5x00, ESP8266/ESP32 AT-command WiFi supporting **UDP Multicast**.
+  
+  The SSDP provides a mechanism whereby network clients, with little or no static configuration, can discover network services. SSDP accomplishes this by providing for multicast discovery support as well as server based notification and discovery routing.
+   
+  The [**SSDP**](https://en.wikipedia.org/wiki/Simple_Service_Discovery_Protocol) is used for **advertisement and discovery of network services and presence information**. It accomplishes the task without assistance of server-based configuration mechanisms, such as Dynamic Host Configuration Protocol (DHCP) or Domain Name System (DNS), and without special static configuration of a network host. SSDP is the basis of the discovery protocol of **Universal Plug and Play (UPnP)** and is intended for use in residential or small office environments.
+   
+  This [UPnP_Generic library](https://github.com/khoih-prog/UPnP_Generic) is created to automatically **update your IGDs with the requested port-forward information**, using one of the many available boards / shields. See [Currently Supported Boards](https://github.com/khoih-prog/UPnP_Generic#currently-supported-boards).
+  
+  The time between checks to update the UPnP Port Mappings is **configurable** to match your use case, and is set in the examples at 10 minutes. The LEASE_DURATION is also configurable and default to 10hrs (36000s). The Virtual Server Name can also be specified in the sketch and is shown in the IGD, e.g. `NRF52-W5X00` or `ESP8266-WIFI` as in the following picture:
   
 <p align="center">
   <img src="https://github.com/khoih-prog/UPnP_Generic/blob/master/pics/VirtualServers.png">
@@ -87,7 +90,7 @@
    - [`EthernetLarge library v2.0.0+`](https://github.com/OPEnSLab-OSU/EthernetLarge) for W5100, W5200 and W5500.
 13. [`WiFiNINA_Generic library v1.7.1+`](https://github.com/khoih-prog/WiFiNINA_Generic) to use WiFiNINA modules/shields. To install. check [![arduino-library-badge](https://www.ardu-badge.com/badge/WiFiNINA_Generic.svg?)](https://www.ardu-badge.com/WiFiNINA_Generic) if using WiFiNINA for boards such as Nano 33 IoT, nRF52, Teensy, etc.
 14. [`WiFiWebServer library v1.0.6+`](https://github.com/khoih-prog/WiFiWebServer) to use WiFi/WiFiNINA modules/shields. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/WiFiWebServer.svg?)](https://www.ardu-badge.com/WiFiWebServer)
-15. [`EthernetWebServer library v1.0.121+`](https://github.com/khoih-prog/EthernetWebServer) to use Ethernet modules/shields on boards other than STM32F/L/H/G/WB/MP1. To install. check [![arduino-library-badge](https://www.ardu-badge.com/badge/EthernetWebServer.svg?)](https://www.ardu-badge.com/EthernetWebServer).
+15. [`EthernetWebServer library v1.0.12+`](https://github.com/khoih-prog/EthernetWebServer) to use Ethernet modules/shields on boards other than STM32F/L/H/G/WB/MP1. To install. check [![arduino-library-badge](https://www.ardu-badge.com/badge/EthernetWebServer.svg?)](https://www.ardu-badge.com/EthernetWebServer).
 16. [`EthernetWebServer_STM32 library v1.0.5+`](https://github.com/khoih-prog/EthernetWebServer_STM32) to use Ethernet modules/shields on STM32F/L/H/G/WB/MP1 boards. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/EthernetWebServer_STM32.svg?)](https://www.ardu-badge.com/EthernetWebServer_STM32).
 17. [`ESP8266_AT_WebServer library v1.1.0+`](https://github.com/khoih-prog/ESP8266_AT_WebServer) to use ESP8266-AT/ESP32-AT WiFi modules/shields. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP8266_AT_WebServer.svg?)](https://www.ardu-badge.com/ESP8266_AT_WebServer)
 
