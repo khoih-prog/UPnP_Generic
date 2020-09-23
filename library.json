@@ -1,0 +1,31 @@
+{
+  "name": "UPnP_Generic",
+  "version": "3.1.4",
+  "description": "Automatically add port mappings to router using UPnP SSDP for Arduino boards, running on nRF52, SAMD21/SAMD51, STM32F/L/H/G/WB/MP1, Teensy, etc. besides ESP8266/ESP32, using ESP WiFi, WiFiNINA, Ethernet W5x00, ESP8266/ESP32 AT-command WiFi",
+  "keywords": "uPnP, SSDP, router, port-mappings, port-forwarding, update, wifi, ethernet, client, server, communication",
+  "authors": 
+  [
+    {
+      "name":  "Khoi Hoang",
+      "url":   "https://github.com/khoih-prog",
+      "email": "khoih.prog@gmail.com",
+      "maintainer": true
+    }  
+  ],
+  "repository":
+  {
+    "type": "git",
+    "url": "https://github.com/khoih-prog/UPnP_Generic"
+  },
+  "homepage": "https://github.com/khoih-prog/UPnP_Generic",
+  "export": {
+    "exclude": [
+      "linux",
+      "extras",
+      "tests"
+    ]
+  },  
+  "frameworks": "*",
+  "platforms": "*",
+  "examples": "examples/*/*/*.ino"
+}

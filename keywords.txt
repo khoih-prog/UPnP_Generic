@@ -1,0 +1,39 @@
+#######################################
+# Syntax Coloring Map For UPnP_Generic
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+UPnP	KEYWORD1
+SOAPAction  KEYWORD1
+gatewayInfo KEYWORD1
+upnpRule  KEYWORD1
+upnpRuleNode  KEYWORD1
+portMappingResult KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+###################
+# UPnP Class
+###################
+
+addPortMappingConfig KEYWORD2
+commitPortMappings  KEYWORD2
+updatePortMappings  KEYWORD2
+printAllPortMappings  KEYWORD2
+printPortMappingConfig  KEYWORD2
+testConnectivity  KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+UPNP_SERVICE_TYPE_1 LITERAL1
+UPNP_SERVICE_TYPE_2 LITERAL1
+UPNP_SERVICE_TYPE_TAG_NAME  LITERAL1
+UPNP_SERVICE_TYPE_TAG_START LITERAL1
+UPNP_SERVICE_TYPE_TAG_END LITERAL1
