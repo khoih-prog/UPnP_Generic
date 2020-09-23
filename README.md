@@ -1,4 +1,4 @@
-# UPnP_Generic Library
+## UPnP_Generic Library
 
 [![arduino-library-badge](https://www.ardu-badge.com/badge/UPnP_Generic.svg?)](https://www.ardu-badge.com/UPnP_Generic)
 [![GitHub release](https://img.shields.io/github/release/khoih-prog/UPnP_Generic.svg)](https://github.com/khoih-prog/UPnP_Generic/releases)
@@ -51,7 +51,6 @@
   - **Seeeduino SAMD21/SAMD51 boards (SEEED_WIO_TERMINAL, SEEED_FEMTO_M0, SEEED_XIAO_M0, Wio_Lite_MG126, WIO_GPS_BOARD, SEEEDUINO_ZERO, SEEEDUINO_LORAWAN, SEEED_GROVE_UI_WIRELESS, etc.)**
   - **STM32 (Nucleo-144, Nucleo-64, Nucleo-32, Discovery, STM32F1, STM32F3, STM32F4, STM32H7, STM32L0, etc.)**.
   - **STM32F/L/H/G/WB/MP1 (Nucleo-64 L053R8,Nucleo-144, Nucleo-64, Nucleo-32, Discovery, STM32Fx, STM32H7, STM32Lx, STM32Gx, STM32WB, STM32MP1, etc.) having 64K+ Flash program memory.**
-  -
   
 #### Currently Supported WiFi Modules/Shields
 
@@ -491,52 +490,52 @@ uPnP->printAllPortMappings();
 
 ### B. For Ethernet shields
 
-##### 1. nRF52
+#### 1. nRF52
 
  5. [nRF52_SimpleServer](examples/Generic/Ethernet/nRF52/nRF52_SimpleServer)
  6. [nRF52_PWM_LEDServer](examples/Generic/Ethernet/nRF52/nRF52_PWM_LEDServer)
 
-##### 2. SAMD
+#### 2. SAMD
 
  7. [SAMD_SimpleServer](examples/Generic/Ethernet/SAMD/SAMD_SimpleServer)
  8. [SAMD_PWM_LEDServer](examples/Generic/Ethernet/SAMD/SAMD_PWM_LEDServer)
 
-##### 3. STM32
+#### 3. STM32
 
  9. [STM32_SimpleServer](examples/Generic/Ethernet/STM32/STM32_SimpleServer)
 10. [STM32_PWM_LEDServer](examples/Generic/Ethernet/STM32/STM32_PWM_LEDServer)
 
 
-#### C. For WiFiNINA shields
+### C. For WiFiNINA shields
 
-##### 1. nRF52
+#### 1. nRF52
 
 11. [nRF52_SimpleServer](examples/Generic/WiFiNINA/nRF52/nRF52_SimpleServer)
 12. [nRF52_PWM_LEDServer](examples/Generic/WiFiNINA/nRF52/nRF52_PWM_LEDServer)
 
-##### 2. SAMD
+#### 2. SAMD
 
 13. [SAMD_SimpleServer](examples/Generic/WiFiNINA/SAMD/SAMD_SimpleServer)
 14. [SAMD_PWM_LEDServer](examples/Generic/WiFiNINA/SAMD/SAMD_PWM_LEDServer)
 
-##### 3. STM32
+#### 3. STM32
 
 15. [STM32_SimpleServer](examples/Generic/WiFiNINA/STM32/STM32_SimpleServer)
 16. [STM32_PWM_LEDServer](examples/Generic/WiFiNINA/STM32/STM32_PWM_LEDServer)
 
-#### D. For ESP8266-AT/ESP32-AT shields
+### D. For ESP8266-AT/ESP32-AT shields
 
-##### 1. nRF52
+#### 1. nRF52
 
 17. [nRF52_SimpleServer](examples/Generic/ESP_AT/nRF52/nRF52_SimpleServer)
 18. [nRF52_PWM_LEDServer](examples/Generic/ESP_AT/nRF52/nRF52_PWM_LEDServer)
 
-##### 2. SAMD
+#### 2. SAMD
 
 19. [SAMD_SimpleServer](examples/Generic/ESP_AT/SAMD/SAMD_SimpleServer)
 20. [SAMD_PWM_LEDServer](examples/Generic/ESP_AT/SAMD/SAMD_PWM_LEDServer)
 
-##### 3. STM32
+#### 3. STM32
 
 21. [STM32_SimpleServer](examples/Generic/ESP_AT/STM32/STM32_SimpleServer)
 22. [STM32_PWM_LEDServer](examples/Generic/ESP_AT/STM32/STM32_PWM_LEDServer)
