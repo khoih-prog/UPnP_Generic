@@ -64,7 +64,7 @@
   - **W5x00's using Ethernet, EthernetLarge or Ethernet3 Library.**
   - **Ethernet2 Library is also supported after applying the fix to add Multicast feature**. See [Libraries' Patches](https://github.com/khoih-prog/EthernetWebServer#libraries-patches)
   - ENC28J60 using EthernetENC or UIPEthernet library is not supported as UDP Multicast is not available by design.
-  - LAN872A using STM32Ethernet / STM32 LwIP libraries is not supported as UDP Multicast is not enabled by design, unless you modify the code to add support.
+  - LAN8742A using STM32Ethernet / STM32 LwIP libraries is not supported as UDP Multicast is not enabled by design, unless you modify the code to add support.
   
 ---
 ---
@@ -987,6 +987,14 @@ DDNSGeneric - IP Change Detected: 216.154.52.212
   <img src="https://github.com/khoih-prog/UPnP_Generic/blob/master/pics/Nano33IoT_WiFiNINA.png">
 </p>
 
+
+and screenshot for nRF52840 NINA_B302_ublox with W102 WiFiNINA using WiFiNINA_Generic Library
+
+
+<p align="center">
+  <img src="https://github.com/khoih-prog/UPnP_Generic/blob/master/pics/B302_WiFiNINA.png">
+</p>
+
 ---
 
 #### 2. Debug terminal output when running example [nRF52_SimpleServer](examples/Generic/Ethernet/nRF52/nRF52_SimpleServer) on Adafruit NRF52840_FEATHER with with W5500 & Ethernet2 Library
@@ -1074,10 +1082,9 @@ DDNSGeneric - IP Change Detected: aaa.bbb.ccc.ddd
 #### 4. Debug terminal output when running example [STM32_SimpleServer](examples/Generic/Ethernet/STM32/STM32_SimpleServer) on STM32F7 Nucleo-144 NUCLEO_F767ZI with W5500 using Ethernet3 Library
 
 ```
-Start STM32_SimpleServer on NUCLEO_F767ZI with W5x00 & Ethernet3 Library
-
-Ethernet3 W5500 init, using SPI_CS = 10, number of sockets = 4
-**[UPnP] IGD current port mappings:
+Start STM32_SimpleServer on NUCLEO_F767ZI with W5x00 & Ethernet2 Library
+Add Port Forwarding, Try # 1
+[UPnP] IGD current port mappings:
 0.   Blynk Server                  192.168.2.110     9443   9443   TCP    0
 1.   Blynk WebServer               192.168.2.110     80     80     TCP    0
 2.   Blynk Hardware Server         192.168.2.110     8080   8080   TCP    0
@@ -1087,27 +1094,28 @@ Ethernet3 W5500 init, using SPI_CS = 10, number of sockets = 4
 6.   Blynk Server SSL              192.168.2.110     9443   443    TCP    0
 7.   MariaDB / MySQL               192.168.2.112     5698   5698   TCP    0
 8.   MariaDB / MySQL               192.168.2.112     3306   3306   TCP    0
-9.   SAMD-LED-W5X00                192.168.2.85      5999   5999   TCP    25855
-10.  SAMD-LED-WIFININA             192.168.2.128     5996   5996   TCP    27365
-11.  ESP8266-LED-WIFI              192.168.2.81      8267   8267   TCP    32195
-12.  ESP32-LED-WIFI                192.168.2.82      5933   5933   TCP    33915
-13.  NRF52-LED-W5X00               192.168.2.88      5953   5953   TCP    34930
-14.  SAMD-W5X00                    192.168.2.84      5990   5990   TCP    35105
-15.  STM32-W5X00                   192.168.2.93      5991   5991   TCP    35970
+9.   SAMD-LED-WIFI-ESPAT           192.168.2.134     5991   5991   TCP    30045
+10.  SAMD-WIFI-ESPAT               192.168.2.134     5990   5990   TCP    34800
+11.  ESP32-LED-WIFI                192.168.2.82      5933   5933   TCP    32295
+12.  STM32-W5X00                   192.168.2.85      6032   6032   TCP    35985
 
 UPnP done
-HTTP EthernetWebServer is @ IP : 192.168.2.85
+HTTP EthernetWebServer is @ IP : 192.168.2.85, port = 6032
 [DDNS] Access whatismyipaddress
 [DDNS] httpCode = 200
-[DDNS] Current Public IP = aaa.bbb.ccc.ddd
-[DDNS] response = aaa.bbb.ccc.ddd
+[DDNS] Current Public IP = 216.154.52.212
+[DDNS] response = 216.154.52.212
 [DDNS] Sending HTTP_GET to duckdns
-[DDNS] HTTP_GET = http://www.duckdns.org/update?domains=account.duckdns.org&token=12345678-1234-1234-1234-123456789012&ip=aaa.bbb.ccc.ddd
+[DDNS] HTTP_GET = http://www.duckdns.org/update?domains=account.duckdns.org&token=12345678-1234-1234-1234-123456789012&ip=216.154.52.212
 [DDNS] httpCode = 200
-DDNSGeneric - IP Change Detected: aaa.bbb.ccc.ddd
-[DDNS] Updated IP = aaa.bbb.ccc.ddd
+DDNSGeneric - IP Change Detected: 216.154.52.212
+[DDNS] Updated IP = 216.154.52.212
 
 ```
+
+<p align="center">
+  <img src="https://github.com/khoih-prog/UPnP_Generic/blob/master/pics/F767ZI_Ethernet2.png">
+</p>
 
 ---
 
