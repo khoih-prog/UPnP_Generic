@@ -22,7 +22,7 @@
 
 // Debug Level from 0 to 4
 #define _DDNS_GENERIC_LOGLEVEL_     1
-#define _UPNP_LOGLEVEL_             3
+#define _UPNP_LOGLEVEL_             2
 
 // Select DDNS_USING_WIFI for boards using built-in WiFi, such as Nano-33-IoT
 #define DDNS_USING_WIFI             false
@@ -123,9 +123,9 @@
 #if !(USE_BUILTIN_ETHERNET || USE_UIP_ETHERNET)
   // Only one if the following to be true
   #define USE_ETHERNET          false //true
-  #define USE_ETHERNET2         false //true
+  #define USE_ETHERNET2         true //true
   #define USE_ETHERNET3         false //true
-  #define USE_ETHERNET_LARGE    true
+  #define USE_ETHERNET_LARGE    false
   #define USE_ETHERNET_ESP8266  false //true
   #define USE_ETHERNET_ENC      false
   #define USE_CUSTOM_ETHERNET   false

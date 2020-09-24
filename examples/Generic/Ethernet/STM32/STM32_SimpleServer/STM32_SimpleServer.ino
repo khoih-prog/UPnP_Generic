@@ -46,13 +46,35 @@ void onUpdateCallback(const char* oldIP, const char* newIP)
   Serial.println(newIP);
 }
 
-void handleRoot() 
+void handleRoot()
 {
-  String message = "Hello from " + String(BOARD_NAME) + " running TinyUPnP & DDNS_Generic";
-
+#define BUFFER_SIZE     400
   
   digitalWrite(led, 1);
-  server.send(200, "text/plain", message);
+  char temp[BUFFER_SIZE];
+  int sec = millis() / 1000;
+  int min = sec / 60;
+  int hr = min / 60;
+  int day = hr / 24;
+
+  snprintf(temp, BUFFER_SIZE - 1,
+           "<html>\
+<head>\
+<meta http-equiv='refresh' content='5'/>\
+<title>%s</title>\
+<style>\
+body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }\
+</style>\
+</head>\
+<body>\
+<h1>Hello from %s</h1>\
+<h3>running UPnP_Generic & DDNS_Generic</h3>\
+<h3>on %s</h3>\
+<p>Uptime: %d d %02d:%02d:%02d</p>\
+</body>\
+</html>", BOARD_NAME, BOARD_NAME, SHIELD_TYPE, day, hr, min % 60, sec % 60);
+
+  server.send(200, "text/html", temp);
   digitalWrite(led, 0);
 }
 
