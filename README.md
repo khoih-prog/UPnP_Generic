@@ -987,17 +987,9 @@ DDNSGeneric - IP Change Detected: 216.154.52.212
   <img src="https://github.com/khoih-prog/UPnP_Generic/blob/master/pics/Nano33IoT_WiFiNINA.png">
 </p>
 
-
-and screenshot for nRF52840 NINA_B302_ublox with W102 WiFiNINA using WiFiNINA_Generic Library
-
-
-<p align="center">
-  <img src="https://github.com/khoih-prog/UPnP_Generic/blob/master/pics/B302_WiFiNINA.png">
-</p>
-
 ---
 
-#### 2. Debug terminal output when running example [nRF52_SimpleServer](examples/Generic/Ethernet/nRF52/nRF52_SimpleServer) on Adafruit NRF52840_FEATHER with with W5500 & Ethernet2 Library
+#### 2. Debug terminal output when running example [nRF52_SimpleServer](examples/Generic/Ethernet/nRF52/nRF52_SimpleServer) on Adafruit NRF52840_FEATHER with W5500 & Ethernet2 Library
 
 ```
 Start nRF52_SimpleServer on NRF52840_FEATHER with W5x00 & Ethernet2 Library
@@ -1032,6 +1024,15 @@ DDNSGeneric - IP Change Detected: aaa.bbb.ccc.ddd
 <p align="center">
   <img src="https://github.com/khoih-prog/UPnP_Generic/blob/master/pics/nRF52840_Ethernet2.png">
 </p>
+
+
+and screenshot for nRF52840 NINA_B302_ublox with W5500 & Ethernet Library
+
+
+<p align="center">
+  <img src="https://github.com/khoih-prog/UPnP_Generic/blob/master/pics/B302_Ethernet.png">
+</p>
+
 
 ---
 
