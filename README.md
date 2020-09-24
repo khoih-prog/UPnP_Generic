@@ -1025,15 +1025,6 @@ DDNSGeneric - IP Change Detected: aaa.bbb.ccc.ddd
   <img src="https://github.com/khoih-prog/UPnP_Generic/blob/master/pics/nRF52840_Ethernet2.png">
 </p>
 
-
-and screenshot for nRF52840 NINA_B302_ublox with W5500 & Ethernet Library
-
-
-<p align="center">
-  <img src="https://github.com/khoih-prog/UPnP_Generic/blob/master/pics/B302_Ethernet.png">
-</p>
-
-
 ---
 
 #### 3. Debug terminal output when running example [nRF52_SimpleServer](examples/Generic/Ethernet/nRF52/nRF52_SimpleServer) on Adafruit NRF52840_FEATHER with W5500 using Ethernet Library
@@ -1078,9 +1069,16 @@ DDNSGeneric - IP Change Detected: aaa.bbb.ccc.ddd
   <img src="https://github.com/khoih-prog/UPnP_Generic/blob/master/pics/nRF52840_Ethernet.png">
 </p>
 
+and screenshot for nRF52840 NINA_B302_ublox with W5500 & Ethernet Library
+
+
+<p align="center">
+  <img src="https://github.com/khoih-prog/UPnP_Generic/blob/master/pics/B302_Ethernet.png">
+</p>
+
 ---
 
-#### 4. Debug terminal output when running example [STM32_SimpleServer](examples/Generic/Ethernet/STM32/STM32_SimpleServer) on STM32F7 Nucleo-144 NUCLEO_F767ZI with W5500 using Ethernet3 Library
+#### 4. Debug terminal output when running example [STM32_SimpleServer](examples/Generic/Ethernet/STM32/STM32_SimpleServer) on STM32F7 Nucleo-144 NUCLEO_F767ZI with W5500 using Ethernet2 Library
 
 ```
 Start STM32_SimpleServer on NUCLEO_F767ZI with W5x00 & Ethernet2 Library
