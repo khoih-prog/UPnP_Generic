@@ -10,11 +10,12 @@
   Based on and modified from Ofek Pearl's TinyUPnP Library (https://github.com/ofekp/TinyUPnP)
   Built by Khoi Hoang https://github.com/khoih-prog/UPnP_Generic
   Licensed under MIT license
-  Version: 3.1.4
+  Version: 3.1.5
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   3.1.4  K Hoang      23/09/2020 Initial coding for Generic boards using many WiFi/Ethernet modules/shields.
+  3.1.5  K Hoang      28/09/2020 Fix issue with nRF52 and STM32F/L/H/G/WB/MP1 using ESP8266/ESP32-AT
  *****************************************************************************************************************************/
 
 /*
@@ -36,14 +37,14 @@
 
 UPnP* uPnP;
 
-ESP8266_AT_WebServer server(LISTEN_PORT);
+ESP8266_AT_WebServer *server;
 
 const int led = 13;
 int status    = WL_IDLE_STATUS;     // the Wifi radio's status
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
-  Serial.print("DDNSGeneric - IP Change Detected: ");
+  Serial.print(F("DDNSGeneric - IP Change Detected: "));
   Serial.println(newIP);
 }
 
@@ -58,8 +59,8 @@ void handleRoot()
   int hr = min / 60;
   int day = hr / 24;
 
-  snprintf(temp, BUFFER_SIZE - 1,
-           "<html>\
+  snprintf_P(temp, BUFFER_SIZE - 1,
+           PSTR("<html>\
 <head>\
 <meta http-equiv='refresh' content='5'/>\
 <title>%s</title>\
@@ -73,31 +74,31 @@ body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Col
 <h3>on %s</h3>\
 <p>Uptime: %d d %02d:%02d:%02d</p>\
 </body>\
-</html>", BOARD_NAME, BOARD_NAME, SHIELD_TYPE, day, hr, min % 60, sec % 60);
+</html>"), BOARD_NAME, BOARD_NAME, SHIELD_TYPE, day, hr, min % 60, sec % 60);
 
-  server.send(200, "text/html", temp);
+  server->send(200, F("text/html"), temp);
   digitalWrite(led, 0);
 }
 
 void handleNotFound() 
 {
   digitalWrite(led, 1);
-  String message = "File Not Found\n\n";
+  String message = F("File Not Found\n\n");
   
-  message += "URI: ";
-  message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
-  message += server.args();
-  message += "\n";
+  message += F("URI: ");
+  message += server->uri();
+  message += F("\nMethod: ");
+  message += (server->method() == HTTP_GET) ? F("GET") : F("POST");
+  message += F("\nArguments: ");
+  message += server->args();
+  message += F("\n");
   
-  for (uint8_t i = 0; i < server.args(); i++) 
+  for (uint8_t i = 0; i < server->args(); i++) 
   {
-    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
+    message += " " + server->argName(i) + ": " + server->arg(i) + "\n";
   }
   
-  server.send(404, "text/plain", message);
+  server->send(404, F("text/plain"), message);
   digitalWrite(led, 0);
 }
 
@@ -109,7 +110,7 @@ void setup(void)
   Serial.begin(115200);
   while (!Serial);
 
-  Serial.print("\nStart STM32_SimpleServer on " + String(BOARD_NAME));
+  Serial.print("\nStart nRF52_SimpleServer on " + String(BOARD_NAME));
   Serial.println(" with " + String(SHIELD_TYPE));
 
   // initialize serial for ESP module
@@ -127,7 +128,7 @@ void setup(void)
     while (true);
   }
 
-  Serial.print("Connecting to ");
+  Serial.print(F("Connecting to "));
   Serial.println(ssid);
   
   WiFi.begin(ssid, pass);
@@ -136,14 +137,14 @@ void setup(void)
   while (WiFi.status() != WL_CONNECTED) 
   {
     delay(500);
-    Serial.print(".");
+    Serial.print(F("."));
   }
   
-  Serial.println("");
+  Serial.println();
 
   IPAddress localIP = WiFi.localIP();
   
-  Serial.print("IP address: ");
+  Serial.print(F("IP address: "));
   Serial.println(localIP);
 
   //Serial.print(F("Gateway IP : "));
@@ -199,31 +200,37 @@ void setup(void)
 
     uPnP->printAllPortMappings();
 
-    Serial.println("\nUPnP done");
+    Serial.println(F("\nUPnP done"));
   }
 
-  server.on("/", handleRoot);
+  server = new ESP8266_AT_WebServer(LISTEN_PORT);
 
-  server.on("/inline", []()
+  if (server)
   {
-    server.send(200, "text/plain", "this works as well");
-  });
-
-  server.onNotFound(handleNotFound);
-
-  server.begin();
-
-  Serial.print(F("HTTP EthernetWebServer is @ IP : "));
-  Serial.print(localIP); 
-  Serial.print(", port = ");
-  Serial.println(LISTEN_PORT);
+    server->on(F("/"), handleRoot);
+  
+    server->on(F("/inline"), []()
+    {
+      server->send(200, F("text/plain"), F("This works as well"));
+    });
+  
+    server->onNotFound(handleNotFound);
+  
+    server->begin();
+  
+    Serial.print(F("HTTP WiFi_ESPAT_WebServer is @ IP : "));
+    Serial.print(localIP); 
+    Serial.print(F(", port = "));
+    Serial.println(LISTEN_PORT);
+  }
 }
 
 void loop(void) 
 {
-  DDNSGeneric.update(300000);
+  DDNSGeneric.update(555000);
 
   uPnP->updatePortMappings(600000);  // 10 minutes
 
-  server.handleClient();
+  if (server)
+    server->handleClient();
 }

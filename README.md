@@ -33,7 +33,14 @@
 
 ---
 
-### Releases v3.1.4
+### Releases v3.1.5
+
+1. Fix issue with nRF52 and STM32F/L/H/G/WB/MP1 using ESP8266/ESP32-AT
+2. Update Platform.ini to support PlatformIO 5.x owner-based dependency declaration.
+3. Enhance examples.
+
+
+#### Releases v3.1.4
 
 1. Initial coding for Generic boards using many different WiFi/Ethernet modules/shields.
 2. Add more examples
@@ -88,10 +95,12 @@
    - [`Ethernet3 library v1.5.3+`](https://github.com/sstaub/Ethernet3) for W5500/WIZ550io/WIZ850io/USR-ES1 with Wiznet W5500 chip.
    - [`EthernetLarge library v2.0.0+`](https://github.com/OPEnSLab-OSU/EthernetLarge) for W5100, W5200 and W5500.
 13. [`WiFiNINA_Generic library v1.7.1+`](https://github.com/khoih-prog/WiFiNINA_Generic) to use WiFiNINA modules/shields. To install. check [![arduino-library-badge](https://www.ardu-badge.com/badge/WiFiNINA_Generic.svg?)](https://www.ardu-badge.com/WiFiNINA_Generic) if using WiFiNINA for boards such as Nano 33 IoT, nRF52, Teensy, etc.
-14. [`WiFiWebServer library v1.0.6+`](https://github.com/khoih-prog/WiFiWebServer) to use WiFi/WiFiNINA modules/shields. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/WiFiWebServer.svg?)](https://www.ardu-badge.com/WiFiWebServer)
-15. [`EthernetWebServer library v1.0.12+`](https://github.com/khoih-prog/EthernetWebServer) to use Ethernet modules/shields on boards other than STM32F/L/H/G/WB/MP1. To install. check [![arduino-library-badge](https://www.ardu-badge.com/badge/EthernetWebServer.svg?)](https://www.ardu-badge.com/EthernetWebServer).
-16. [`EthernetWebServer_STM32 library v1.0.5+`](https://github.com/khoih-prog/EthernetWebServer_STM32) to use Ethernet modules/shields on STM32F/L/H/G/WB/MP1 boards. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/EthernetWebServer_STM32.svg?)](https://www.ardu-badge.com/EthernetWebServer_STM32).
-17. [`ESP8266_AT_WebServer library v1.1.0+`](https://github.com/khoih-prog/ESP8266_AT_WebServer) to use ESP8266-AT/ESP32-AT WiFi modules/shields. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP8266_AT_WebServer.svg?)](https://www.ardu-badge.com/ESP8266_AT_WebServer)
+14. [`WiFiWebServer library v1.0.7+`](https://github.com/khoih-prog/WiFiWebServer) to use WiFi/WiFiNINA modules/shields. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/WiFiWebServer.svg?)](https://www.ardu-badge.com/WiFiWebServer)
+15. [`EthernetWebServer library v1.0.13+`](https://github.com/khoih-prog/EthernetWebServer) to use Ethernet modules/shields on boards other than STM32F/L/H/G/WB/MP1. To install. check [![arduino-library-badge](https://www.ardu-badge.com/badge/EthernetWebServer.svg?)](https://www.ardu-badge.com/EthernetWebServer).
+16. [`EthernetWebServer_STM32 library v1.0.6+`](https://github.com/khoih-prog/EthernetWebServer_STM32) to use Ethernet modules/shields on STM32F/L/H/G/WB/MP1 boards. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/EthernetWebServer_STM32.svg?)](https://www.ardu-badge.com/EthernetWebServer_STM32).
+17. [`ESP8266_AT_WebServer library v1.1.1+`](https://github.com/khoih-prog/ESP8266_AT_WebServer) to use ESP8266-AT/ESP32-AT WiFi modules/shields. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP8266_AT_WebServer.svg?)](https://www.ardu-badge.com/ESP8266_AT_WebServer)
+18. [`DDNS_Generic library v1.0.1+`](https://github.com/khoih-prog/DDNS_Generic) to use examples. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/DDNS_Generic.svg?)](https://www.ardu-badge.com/DDNS_Generic)
+
 
 ---
 
@@ -549,6 +558,12 @@ uPnP->printAllPortMappings();
 
 
 ```cpp
+/*
+  Note: This example uses the DDNS_Generic library (https://github.com/khoih-prog/DDNS_Generic)
+        You can access this WebServer by either localIP:LISTEN_PORT such as 192.169.2.100:5952
+        or DDNS_Host:LISTEN_PORT, such as account.duckdns.org:5952
+*/
+
 #include "defines.h"
 
 #define UPNP_USING_ETHERNET     true
@@ -563,11 +578,17 @@ UPnP* uPnP;
 
 EthernetWebServer server(LISTEN_PORT);
 
-const int led = 13;
+#if defined(LED_BLUE)
+  #define LED_PIN           LED_BLUE        //  BLUE_LED on nRF52840 Feather Express, Itsy-Bitsy
+#else
+  #define LED_PIN           3               //  RED LED
+#endif
+
+const int led = LED_PIN;
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
-  Serial.print("DDNSGeneric - IP Change Detected: ");
+  Serial.print(F("DDNSGeneric - IP Change Detected: "));
   Serial.println(newIP);
 }
 
@@ -599,29 +620,29 @@ body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Col
 </body>\
 </html>", BOARD_NAME, BOARD_NAME, SHIELD_TYPE, day, hr, min % 60, sec % 60);
 
-  server.send(200, "text/html", temp);
+  server.send(200, F("text/html"), temp);
   digitalWrite(led, 0);
 }
 
 void handleNotFound() 
 {
   digitalWrite(led, 1);
-  String message = "File Not Found\n\n";
+  String message = F("File Not Found\n\n");
   
-  message += "URI: ";
+  message += F("URI: ");
   message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
+  message += F("\nMethod: ");
+  message += (server.method() == HTTP_GET) ? F("GET") : F("POST");
+  message += F("\nArguments: ");
   message += server.args();
-  message += "\n";
+  message += F("\n");
   
   for (uint8_t i = 0; i < server.args(); i++) 
   {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   
-  server.send(404, "text/plain", message);
+  server.send(404, F("text/plain"), message);
   digitalWrite(led, 0);
 }
 
@@ -727,14 +748,14 @@ void setup(void)
 
     uPnP->printAllPortMappings();
 
-    Serial.println("\nUPnP done");
+    Serial.println(F("\nUPnP done"));
   }
   
-  server.on("/", handleRoot);
+  server.on(F("/"), handleRoot);
 
-  server.on("/inline", []()
+  server.on(F("/inline"), []()
   {
-    server.send(200, "text/plain", "this works as well");
+    server.send(200, F("text/plain"), F("This works as well"));
   });
 
   server.onNotFound(handleNotFound);
@@ -743,7 +764,7 @@ void setup(void)
 
   Serial.print(F("HTTP EthernetWebServer is @ IP : "));
   Serial.print(localIP); 
-  Serial.print(", port = ");
+  Serial.print(F(", port = "));
   Serial.println(LISTEN_PORT);
 }
 
@@ -953,9 +974,12 @@ IPAddress ip(192, 168, 2, 222);
 #### 1. Debug terminal output when running example [SAMD_SimpleServer](examples/Generic/WiFiNINA/SAMD/SAMD_SimpleServer) on SAMD21 SAMD_NANO_33_IOT with WiFiNINA using WiFiNINA_Generic Library
 
 ```
+
 Start SAMD_SimpleServer on SAMD_NANO_33_IOT with WiFiNINA using WiFiNINA_Generic Library
-Connecting to WPA SSID: HueNet1
-Try # 1
+Connecting to HueNet1
+
+IP address: 192.168.2.128
+Add Port Forwarding, Try # 1
 [UPnP] IGD current port mappings:
 0.   Blynk Server                  192.168.2.110     9443   9443   TCP    0
 1.   Blynk WebServer               192.168.2.110     80     80     TCP    0
@@ -966,21 +990,25 @@ Try # 1
 6.   Blynk Server SSL              192.168.2.110     9443   443    TCP    0
 7.   MariaDB / MySQL               192.168.2.112     5698   5698   TCP    0
 8.   MariaDB / MySQL               192.168.2.112     3306   3306   TCP    0
-9.   SAMD-WIFI-ESPAT               192.168.2.101     5990   5990   TCP    35475
-10.  SAMD-WIFI                     192.168.2.128     5999   5999   TCP    35985
+9.   SAMD-WIFI-ESPAT               192.168.2.134     5990   5990   TCP    22410
+10.  NRF52-WIFI-ESPAT              192.168.2.101     7052   7052   TCP    22110
+11.  STM32-WIFI-ESPAT              192.168.2.133     7032   7032   TCP    12315
+12.  STM32-W5X00                   192.168.2.85      6032   6032   TCP    34005
+13.  NRF52-W5X00                   192.168.2.85      5952   5952   TCP    32340
+14.  STM32-LED-W5X00               192.168.2.85      6033   6033   TCP    34455
+15.  SAMD-WIFININA                 192.168.2.128     5995   5995   TCP    35970
 
 UPnP done
-HTTP EthernetWebServer is @ IP : 192.168.2.128
+HTTP WiFiNINAWebServer is @ IP : 192.168.2.128, port = 5995
 [DDNS] Access whatismyipaddress
+Connected
 [DDNS] httpCode = 200
-[DDNS] Current Public IP = 216.154.52.212
-[DDNS] response = 216.154.52.212
-[DDNS] Sending HTTP_GET to duckdns
-[DDNS] HTTP_GET = http://www.duckdns.org/update?domains=account.duckdns.org&token=12345678-1234-1234-1234-123456789012&ip=216.154.52.212
-[DDNS] httpCode = 200
-DDNSGeneric - IP Change Detected: 216.154.52.212
-[DDNS] Updated IP = 216.154.52.212
-
+HttpClient::responseBody => bodyLength =14
+[DDNS] Current Public IP = aaa.bbb.ccc.ddd
+[DDNS] response = aaa.bbb.ccc.ddd
+Connected
+DDNSGeneric - IP Change Detected: aaa.bbb.ccc.ddd
+[DDNS] Updated IP = aaa.bbb.ccc.ddd
 ```
 
 <p align="center">
@@ -1216,7 +1244,13 @@ DDNSGeneric - IP Change Detected: aaa.bbb.ccc.ddd
 
 ## Releases
 
-### Releases v3.1.4
+### Releases v3.1.5
+
+1. Fix issue with nRF52 and STM32F/L/H/G/WB/MP1 using ESP8266/ESP32-AT
+2. Update Platform.ini to support PlatformIO 5.x owner-based dependency declaration.
+3. Enhance examples.
+
+#### Releases v3.1.4
 
 1. Initial coding for Generic boards using many different WiFi/Ethernet modules/shields.
 2. Add more examples
@@ -1249,6 +1283,7 @@ DDNSGeneric - IP Change Detected: aaa.bbb.ccc.ddd
   - LAN872A using STM32Ethernet / STM32 LwIP libraries is not supported as UDP Multicast is not enabled by design, unless you modify the code to add support.
   
 ---
+---
 
 ### TO DO
 
@@ -1270,6 +1305,7 @@ DDNSGeneric - IP Change Detected: aaa.bbb.ccc.ddd
  9. Add support to ESP8266-AT, ESP32-AT WiFi shields using [ESP8266_AT_WebServer](https://github.com/khoih-prog/ESP8266_AT_WebServer) or WiFiEspAT library.
 
  
+---
 ---
 
 ### Contributions and Thanks

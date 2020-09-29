@@ -10,11 +10,12 @@
   Based on and modified from Ofek Pearl's TinyUPnP Library (https://github.com/ofekp/TinyUPnP)
   Built by Khoi Hoang https://github.com/khoih-prog/UPnP_Generic
   Licensed under MIT license
-  Version: 3.1.4
+  Version: 3.1.5
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   3.1.4  K Hoang      23/09/2020 Initial coding for Generic boards using many WiFi/Ethernet modules/shields.
+  3.1.5  K Hoang      28/09/2020 Fix issue with nRF52 and STM32F/L/H/G/WB/MP1 using ESP8266/ESP32-AT
  *****************************************************************************************************************************/
  
 #ifndef UPnP_Generic_Ethernet_h
@@ -69,9 +70,6 @@
   #warning Using Ethernet lib
   #define SHIELD_TYPE           "W5x00 & Ethernet Library"
 #endif
-
-//#include <WiFiUdp.h>
-//#include <WiFiClient.h>
 
 #include <limits.h>
 
@@ -142,41 +140,43 @@ typedef struct _gatewayInfo
 {
   // router info
   IPAddress host;
-  int port;  // this port is used when getting router capabilities and xml files
-  String path;  // this is the path that is used to retrieve router information from xml files
+  int       port;                 // this port is used when getting router capabilities and xml files
+  String    path;                 // this is the path that is used to retrieve router information from xml files
 
   // info for actions
-  int actionPort;  // this port is used when performing SOAP API actions
-  String actionPath;  // this is the path used to perform SOAP API actions
-  String serviceTypeName;  // i.e "WANPPPConnection:1" or "WANIPConnection:1"
+  int       actionPort;           // this port is used when performing SOAP API actions
+  String    actionPath;           // this is the path used to perform SOAP API actions
+  String    serviceTypeName;      // i.e "WANPPPConnection:1" or "WANIPConnection:1"
 } gatewayInfo;
 
 typedef struct _upnpRule
 {
-  int index;
-  String devFriendlyName;
+  int       index;
+  String    devFriendlyName;
   IPAddress internalAddr;
-  int internalPort;
-  int externalPort;
-  String protocol;
-  int leaseDuration;
+  int       internalPort;
+  int       externalPort;
+  String    protocol;
+  int       leaseDuration;
 } upnpRule;
 
 typedef struct _upnpRuleNode
 {
-  _upnpRule *upnpRule;
-  _upnpRuleNode *next;
+  _upnpRule       *upnpRule;
+  _upnpRuleNode   *next;
 } upnpRuleNode;
 
 enum portMappingResult
 {
-  PORT_MAP_SUCCESS,   // port mapping was added
-  ALREADY_MAPPED,     // the port mapping is already found in the IGD
+  PORT_MAP_SUCCESS,           // port mapping was added
+  ALREADY_MAPPED,             // the port mapping is already found in the IGD
   EMPTY_PORT_MAPPING_CONFIG,
   NETWORK_ERROR,
   TIMEOUT,
-  NOP  // the check is delayed
+  NOP                         // the check is delayed
 };
+
+/////////////////////////////////////////////////////////////////////
 
 class UPnP
 {

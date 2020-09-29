@@ -10,11 +10,12 @@
   Based on and modified from Ofek Pearl's TinyUPnP Library (https://github.com/ofekp/TinyUPnP)
   Built by Khoi Hoang https://github.com/khoih-prog/UPnP_Generic
   Licensed under MIT license
-  Version: 3.1.4
+  Version: 3.1.5
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   3.1.4  K Hoang      23/09/2020 Initial coding for Generic boards using many WiFi/Ethernet modules/shields.
+  3.1.5  K Hoang      28/09/2020 Fix issue with nRF52 and STM32F/L/H/G/WB/MP1 using ESP8266/ESP32-AT
  *****************************************************************************************************************************/
 
 #ifndef UPnP_Generic_Impl_h
@@ -22,26 +23,20 @@
 
 #include <Arduino.h>
 
-#ifdef UPNP_DEBUG
-  #define debugPrint(...) Serial.print( __VA_ARGS__ )
-  #define debugPrintln(...) Serial.println( __VA_ARGS__ )
-#else
-  #define debugPrint(...)
-  #define debugPrintln(...)
-#endif
+IPAddress ipMulti(239, 255, 255, 250);            // multicast address for SSDP
+IPAddress connectivityTestIp(64, 233, 187, 99);   // Google
+IPAddress ipNull(0, 0, 0, 0);                     // indication to update rules when the IP of the device changes
 
-IPAddress ipMulti(239, 255, 255, 250);  // multicast address for SSDP
-IPAddress connectivityTestIp(64, 233, 187, 99);  // Google
-IPAddress ipNull(0, 0, 0, 0);  // indication to update rules when the IP of the device changes
-
-char packetBuffer[UDP_TX_PACKET_MAX_SIZE];  // buffer to hold incoming packet UDP_TX_PACKET_MAX_SIZE=8192
+char packetBuffer[UDP_TX_PACKET_MAX_SIZE];        // buffer to hold incoming packet UDP_TX_PACKET_MAX_SIZE=8192
 char responseBuffer[UDP_TX_RESPONSE_MAX_SIZE];
 
 char body_tmp[1200];
 char integer_string[32];
 
-SOAPAction SOAPActionGetSpecificPortMappingEntry = {.name = "GetSpecificPortMappingEntry"};
-SOAPAction SOAPActionDeletePortMapping = {.name = "DeletePortMapping"};
+SOAPAction SOAPActionGetSpecificPortMappingEntry  = {.name = "GetSpecificPortMappingEntry"};
+SOAPAction SOAPActionDeletePortMapping            = {.name = "DeletePortMapping"};
+
+/////////////////////////////////////////////////////////////////////
 
 String IPAddresstoString(IPAddress ipAddress)
 {
@@ -51,14 +46,15 @@ String IPAddresstoString(IPAddress ipAddress)
   return String(szRet);
 }
 
+/////////////////////////////////////////////////////////////////////
 
 // timeoutMs - timeout in milli seconds for the operations of this class, 0 for blocking operation
 UPnP::UPnP(unsigned long timeoutMs = 20000)
 {
-  _timeoutMs = timeoutMs;
-  _lastUpdateTime = 0;
+  _timeoutMs        = timeoutMs;
+  _lastUpdateTime   = 0;
   _consequtiveFails = 0;
-  _headRuleNode = NULL;
+  _headRuleNode     = NULL;
 
   clearGatewayInfo(&_gwInfo);
 
@@ -66,15 +62,19 @@ UPnP::UPnP(unsigned long timeoutMs = 20000)
   UPNP_LOGINFO1(F("UDP_TX_RESPONSE_MAX_SIZE="), UDP_TX_RESPONSE_MAX_SIZE);
 }
 
+/////////////////////////////////////////////////////////////////////
+
 UPnP::~UPnP()
 {
 }
 
+/////////////////////////////////////////////////////////////////////
+
 void UPnP::addPortMappingConfig(IPAddress ruleIP, int rulePort, String ruleProtocol, int ruleLeaseDuration, String ruleFriendlyName)
 {
-  static int index = 0;
+  static int index      = 0;
   upnpRule *newUpnpRule = new upnpRule();
-  newUpnpRule->index = index++;
+  newUpnpRule->index    = index++;
 
 #if UPNP_USING_ETHERNET
   newUpnpRule->internalAddr = (ruleIP == Ethernet.localIP()) ? ipNull : ruleIP;  // for automatic IP change handling
@@ -84,16 +84,16 @@ void UPnP::addPortMappingConfig(IPAddress ruleIP, int rulePort, String ruleProto
 
   UPNP_LOGINFO1(F("newUpnpRule="), newUpnpRule->internalAddr);
 
-  newUpnpRule->internalPort = rulePort;
-  newUpnpRule->externalPort = rulePort;
-  newUpnpRule->leaseDuration = ruleLeaseDuration;
-  newUpnpRule->protocol = ruleProtocol;
-  newUpnpRule->devFriendlyName = ruleFriendlyName;
+  newUpnpRule->internalPort     = rulePort;
+  newUpnpRule->externalPort     = rulePort;
+  newUpnpRule->leaseDuration    = ruleLeaseDuration;
+  newUpnpRule->protocol         = ruleProtocol;
+  newUpnpRule->devFriendlyName  = ruleFriendlyName;
 
   // linked list insert
   upnpRuleNode *newUpnpRuleNode = new upnpRuleNode();
-  newUpnpRuleNode->upnpRule = newUpnpRule;
-  newUpnpRuleNode->next = NULL;
+  newUpnpRuleNode->upnpRule     = newUpnpRule;
+  newUpnpRuleNode->next         = NULL;
 
   if (_headRuleNode == NULL)
   {
@@ -112,11 +112,13 @@ void UPnP::addPortMappingConfig(IPAddress ruleIP, int rulePort, String ruleProto
   }
 }
 
+/////////////////////////////////////////////////////////////////////
+
 portMappingResult UPnP::commitPortMappings()
 {
   if (!_headRuleNode)
   {
-    UPNP_LOGINFO(F("ERROR: No UPnP port mapping was set."));
+    UPNP_LOGINFO(F("ERROR: No UPnP port mapping set."));
 
     return EMPTY_PORT_MAPPING_CONFIG;
   }
@@ -127,7 +129,7 @@ portMappingResult UPnP::commitPortMappings()
   // verify WiFi is connected
   if (!testConnectivity(startTime))
   {
-    UPNP_LOGINFO(F("ERROR: not connected to Ethernet Network, cannot continue"));
+    UPNP_LOGINFO(F("ERROR: not connected to Ethernet Network, can't continue"));
 
     return NETWORK_ERROR;
   }
@@ -135,7 +137,7 @@ portMappingResult UPnP::commitPortMappings()
   // verify WiFi is connected
   if (!testConnectivity(startTime))
   {
-    UPNP_LOGINFO(F("ERROR: not connected to WiFi, cannot continue"));
+    UPNP_LOGINFO(F("ERROR: not connected to WiFi, can't continue"));
 
     return NETWORK_ERROR;
   }
@@ -219,7 +221,7 @@ portMappingResult UPnP::commitPortMappings()
 
   if (allPortMappingsAlreadyExist)
   {
-    UPNP_LOGINFO(F("All port mappings found in the IGD, doing nothing"));
+    UPNP_LOGINFO(F("All port mappings found in IGD, doing nothing"));
 
     return ALREADY_MAPPED;
   }
@@ -228,16 +230,18 @@ portMappingResult UPnP::commitPortMappings()
     // addedPortMappings is at least 1 here
     if (addedPortMappings > 1)
     {
-      UPNP_LOGINFO1(addedPortMappings, F(" UPnP port mappings were added"));
+      UPNP_LOGINFO1(addedPortMappings, F("UPnP port mappings added"));
     }
     else
     {
-      UPNP_LOGINFO(F("One UPnP port mapping was added"));
+      UPNP_LOGINFO(F("One UPnP port mapping added"));
     }
   }
 
   return PORT_MAP_SUCCESS;
 }
+
+/////////////////////////////////////////////////////////////////////
 
 bool UPnP::getGatewayInfo(gatewayInfo *deviceInfo, long startTime)
 {
@@ -292,7 +296,7 @@ bool UPnP::getGatewayInfo(gatewayInfo *deviceInfo, long startTime)
   {
     if (_timeoutMs > 0 && (millis() - startTime > _timeoutMs))
     {
-      UPNP_LOGINFO(F("Timeout connect to the IGD"));
+      UPNP_LOGINFO(F("Timeout connect to IGD"));
 
       _UPnPClient.stop();
       return false;
@@ -318,6 +322,8 @@ bool UPnP::getGatewayInfo(gatewayInfo *deviceInfo, long startTime)
   return true;
 }
 
+/////////////////////////////////////////////////////////////////////
+
 void UPnP::clearGatewayInfo(gatewayInfo *deviceInfo)
 {
   deviceInfo->host = IPAddress(0, 0, 0, 0);
@@ -327,6 +333,8 @@ void UPnP::clearGatewayInfo(gatewayInfo *deviceInfo)
   deviceInfo->actionPath = "";
   deviceInfo->serviceTypeName = "";
 }
+
+/////////////////////////////////////////////////////////////////////
 
 bool UPnP::isGatewayInfoValid(gatewayInfo *deviceInfo)
 {
@@ -339,15 +347,17 @@ bool UPnP::isGatewayInfoValid(gatewayInfo *deviceInfo)
       || deviceInfo->path.length() == 0
       || deviceInfo->actionPort == 0)
   {
-    UPNP_LOGINFO(F("Gateway info is not valid"));
+    UPNP_LOGINFO(F("Gateway info not valid"));
 
     return false;
   }
 
-  UPNP_LOGINFO(F("Gateway info is valid"));
+  UPNP_LOGINFO(F("Gateway info valid"));
 
   return true;
 }
+
+/////////////////////////////////////////////////////////////////////
 
 portMappingResult UPnP::updatePortMappings(unsigned long intervalMs, callback_function fallback)
 {
@@ -358,7 +368,7 @@ portMappingResult UPnP::updatePortMappings(unsigned long intervalMs, callback_fu
     // fallback
     if (_consequtiveFails >= MAX_NUM_OF_UPDATES_WITH_NO_EFFECT)
     {
-      UPNP_LOGDEBUG1(F("ERROR: Repeated failures on updatePortMappings. Failed times :"), _consequtiveFails);
+      UPNP_LOGDEBUG1(F("ERROR: Many failures on updatePortMappings. Failed times :"), _consequtiveFails);
 
       _consequtiveFails = 0;
       clearGatewayInfo(&_gwInfo);
@@ -406,6 +416,8 @@ portMappingResult UPnP::updatePortMappings(unsigned long intervalMs, callback_fu
   return NOP;  // no need to check yet
 }
 
+/////////////////////////////////////////////////////////////////////
+
 bool UPnP::testConnectivity(unsigned long startTime)
 {
 
@@ -434,26 +446,27 @@ bool UPnP::testConnectivity(unsigned long startTime)
 
 #endif
 
-  UPNP_LOGINFO(F("Testing Internet connection"));
-
   _UPnPClient.connect(connectivityTestIp, 80);
 
   while (!_UPnPClient.connected())
   {
     if (startTime + TCP_CONNECTION_TIMEOUT_MS > millis())
     {
-      UPNP_LOGINFO(F(" ==> BAD"));
+      UPNP_LOGINFO(F("Internet connection BAD"));
 
       _UPnPClient.stop();
       return false;
     }
   }
 
-  UPNP_LOGINFO(F(" ==> GOOD"));
+  UPNP_LOGINFO(F("Internet connection GOOD"));
 
   _UPnPClient.stop();
+  
   return true;
 }
+
+/////////////////////////////////////////////////////////////////////
 
 bool UPnP::verifyPortMapping(gatewayInfo *deviceInfo, upnpRule *rule_ptr)
 {
@@ -528,17 +541,19 @@ bool UPnP::verifyPortMapping(gatewayInfo *deviceInfo, upnpRule *rule_ptr)
   }
   else if (detectedChangedIP)
   {
-    UPNP_LOGINFO(F("Detected a change in IP"));
+    UPNP_LOGINFO(F("Detected change in IP"));
 
     removeAllPortMappingsFromIGD();
   }
   else
   {
-    UPNP_LOGINFO(F("Could not find port mapping in IGD"));
+    UPNP_LOGINFO(F("Couldn't find port mapping in IGD"));
   }
 
   return isPORT_MAP_SUCCESS;
 }
+
+/////////////////////////////////////////////////////////////////////
 
 bool UPnP::deletePortMapping(gatewayInfo *deviceInfo, upnpRule *rule_ptr)
 {
@@ -578,6 +593,8 @@ bool UPnP::deletePortMapping(gatewayInfo *deviceInfo, upnpRule *rule_ptr)
   return isPORT_MAP_SUCCESS;
 }
 
+/////////////////////////////////////////////////////////////////////
+
 bool UPnP::applyActionOnSpecificPortMapping(SOAPAction *soapAction, gatewayInfo *deviceInfo, upnpRule *rule_ptr)
 {
   UPNP_LOGINFO3(F("Apply action :"), soapAction->name, F(" on port mapping :"), rule_ptr->devFriendlyName);
@@ -591,7 +608,7 @@ bool UPnP::applyActionOnSpecificPortMapping(SOAPAction *soapAction, gatewayInfo 
     {
       if (millis() > timeout)
       {
-        UPNP_LOGDEBUG(F("Timeout connect to the IGD"));
+        UPNP_LOGDEBUG(F("Timeout connect to IGD"));
 
         _UPnPClient.stop();
         return false;
@@ -600,6 +617,10 @@ bool UPnP::applyActionOnSpecificPortMapping(SOAPAction *soapAction, gatewayInfo 
       delay(500);
     }
   }
+
+// KH, Somehow nRF52 and STM32 WiFi (ESP8266/ESP32-AT and WiFiNINA) don't behave well with FlashString
+// Disable for nRF52 and STM32 WiFi now.
+#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET) )
 
   strcpy_P(body_tmp, PSTR("<?xml version=\"1.0\"?>\r\n<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n<s:Body>\r\n<u:"));
   strcat_P(body_tmp, soapAction->name);
@@ -644,6 +665,53 @@ bool UPnP::applyActionOnSpecificPortMapping(SOAPAction *soapAction, gatewayInfo 
   _UPnPClient.println(body_tmp);
   _UPnPClient.println();
 
+#else
+
+  strcpy(body_tmp, "<?xml version=\"1.0\"?>\r\n<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n<s:Body>\r\n<u:");
+  strcat(body_tmp, soapAction->name);
+  strcat(body_tmp, " xmlns:u=\"");
+  strcat(body_tmp, deviceInfo->serviceTypeName.c_str());
+  strcat(body_tmp, "\">\r\n<NewRemoteHost></NewRemoteHost>\r\n<NewExternalPort>");
+  sprintf(integer_string, "%d", rule_ptr->internalPort);
+  strcat(body_tmp, integer_string);
+  strcat(body_tmp, "</NewExternalPort>\r\n<NewProtocol>");
+  strcat(body_tmp, rule_ptr->protocol.c_str());
+  strcat(body_tmp, "</NewProtocol>\r\n</u:");
+  strcat(body_tmp, soapAction->name);
+  strcat(body_tmp, ">\r\n</s:Body>\r\n</s:Envelope>\r\n");
+
+  sprintf(integer_string, "%d", strlen(body_tmp));
+
+  _UPnPClient.print("POST ");
+
+  _UPnPClient.print(deviceInfo->actionPath);
+  _UPnPClient.println(" HTTP/1.1");
+  _UPnPClient.println("Connection: close");
+  _UPnPClient.println("Content-Type: text/xml; charset=\"utf-8\"");
+
+  // KH, to verify
+#if (ESP32 || ESP8266)
+  _UPnPClient.println("Host: " + deviceInfo->host.toString() + ":" + String(deviceInfo->actionPort));
+  UPNP_LOGINFO("Host: " + deviceInfo->host.toString() + ":" + String(deviceInfo->actionPort));
+#else
+  _UPnPClient.println("Host: " + String(deviceInfo->host) + ":" + String(deviceInfo->actionPort));
+  UPNP_LOGINFO("Host: " + IPAddresstoString(deviceInfo->host) + ":" + String(deviceInfo->actionPort));
+#endif
+
+  _UPnPClient.print("SOAPAction: \"");
+  _UPnPClient.print(deviceInfo->serviceTypeName);
+  _UPnPClient.print("#");
+  _UPnPClient.print(soapAction->name);
+  _UPnPClient.println("\"");
+  _UPnPClient.print("Content-Length: ");
+  _UPnPClient.println(integer_string);
+  _UPnPClient.println();
+
+  _UPnPClient.println(body_tmp);
+  _UPnPClient.println();
+  
+#endif
+
   UPNP_LOGDEBUG(body_tmp);
 
   timeout = millis() + TCP_CONNECTION_TIMEOUT_MS;
@@ -664,6 +732,8 @@ bool UPnP::applyActionOnSpecificPortMapping(SOAPAction *soapAction, gatewayInfo 
 
   return true;
 }
+
+/////////////////////////////////////////////////////////////////////
 
 void UPnP::removeAllPortMappingsFromIGD()
 {
@@ -722,6 +792,8 @@ bool UPnP::connectUDP()
   return false;
 }
 
+/////////////////////////////////////////////////////////////////////
+
 // broadcast an M-SEARCH message to initiate messages from SSDP devices
 // the router should respond to this message by a packet sent to this device's unicast addresss on the
 // same UPnP port (1900)
@@ -746,11 +818,21 @@ void UPnP::broadcastMSearch()
   
 #endif    // UPNP_USING_ETHERNET
 
+// KH, Somehow nRF52 and STM32 WiFi (ESP8266/ESP32-AT and WiFiNINA) don't behave well with FlashString
+// Disable for nRF52 and STM32 WiFi now.
+#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET) )
   strcpy_P(body_tmp, PSTR("M-SEARCH * HTTP/1.1\r\n"));
   strcat_P(body_tmp, PSTR("HOST: 239.255.255.250:1900\r\n"));
   strcat_P(body_tmp, PSTR("MAN: \"ssdp:discover\"\r\n"));
   strcat_P(body_tmp, PSTR("MX: 5\r\n"));
   strcat_P(body_tmp, PSTR("ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1\r\n\r\n"));
+#else
+  strcpy(body_tmp, "M-SEARCH * HTTP/1.1\r\n");
+  strcat(body_tmp, "HOST: 239.255.255.250:1900\r\n");
+  strcat(body_tmp, "MAN: \"ssdp:discover\"\r\n");
+  strcat(body_tmp, "MX: 5\r\n");
+  strcat(body_tmp, "ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1\r\n\r\n");
+#endif
 
 #if UPNP_USING_ETHERNET
   _udpClient.write(body_tmp, strlen(body_tmp));
@@ -766,6 +848,8 @@ void UPnP::broadcastMSearch()
 
   UPNP_LOGDEBUG1(F("M-SEARCH sent :\n"), body_tmp);
 }
+
+/////////////////////////////////////////////////////////////////////
 
 // Assuming an M-SEARCH message was broadcasted, wait for the response from the IGD (Internet Gateway Device)
 // Note: the response from the IGD is sent back as unicast to this device
@@ -788,7 +872,7 @@ bool UPnP::waitForUnicastResponseToMSearch(gatewayInfo *deviceInfo, IPAddress ga
     return false;
   }
 
-  UPNP_LOGINFO3(F("Received packet of size ="), packetSize, F(", IP ="), remoteIP);
+  UPNP_LOGINFO3(F("Received packet, size ="), packetSize, F(", IP ="), remoteIP);
   UPNP_LOGINFO1(F("Port ="), _udpClient.remotePort());
 
   // sanity check
@@ -811,7 +895,7 @@ bool UPnP::waitForUnicastResponseToMSearch(gatewayInfo *deviceInfo, IPAddress ga
       break;
     }
 
-    UPNP_LOGDEBUG3(F("UDP packet read bytes ="), len, F(" out of "), packetSize);
+    UPNP_LOGDEBUG3(F("UDP packet read bytes ="), len, F(" out of"), packetSize);
 
     memcpy(responseBuffer + idx, packetBuffer, len);
     idx += len;
@@ -824,7 +908,7 @@ bool UPnP::waitForUnicastResponseToMSearch(gatewayInfo *deviceInfo, IPAddress ga
   // only continue if the packet is a response to M-SEARCH and it originated from a gateway device
   if (strstr(responseBuffer, INTERNET_GATEWAY_DEVICE) == NULL)
   {
-    UPNP_LOGINFO(F("IGD was not found"));
+    UPNP_LOGINFO(F("IGD not found"));
 
     return false;
   }
@@ -863,14 +947,14 @@ bool UPnP::waitForUnicastResponseToMSearch(gatewayInfo *deviceInfo, IPAddress ga
     }
     else
     {
-      UPNP_LOGDEBUG(F("ERROR: could not extract value from LOCATION param"));
+      UPNP_LOGDEBUG(F("ERROR: Can't extract value from LOCATION param"));
 
       return false;
     }
   }
   else
   {
-    UPNP_LOGDEBUG(F("ERROR: LOCATION param was not found"));
+    UPNP_LOGDEBUG(F("ERROR: LOCATION param not found"));
 
     return false;
   }
@@ -878,13 +962,14 @@ bool UPnP::waitForUnicastResponseToMSearch(gatewayInfo *deviceInfo, IPAddress ga
   UPNP_LOGINFO1(F("IGD location found :"), location);
 
 
-  IPAddress host = getHost(location);
-  int port = getPort(location);
-  String path = getPath(location);
+  IPAddress host  = getHost(location);
+  int       port  = getPort(location);
+  String    path  = getPath(location);
 
   deviceInfo->host = host;
   deviceInfo->port = port;
   deviceInfo->path = path;
+  
   // the following is the default and may be overridden if URLBase tag is specified
   deviceInfo->actionPort = port;
 
@@ -894,6 +979,8 @@ bool UPnP::waitForUnicastResponseToMSearch(gatewayInfo *deviceInfo, IPAddress ga
 
   return true;
 }
+
+/////////////////////////////////////////////////////////////////////
 
 // a single trial to connect to the IGD (with TCP)
 bool UPnP::connectToIGD(IPAddress host, int port)
@@ -912,6 +999,8 @@ bool UPnP::connectToIGD(IPAddress host, int port)
   return false;
 }
 
+/////////////////////////////////////////////////////////////////////
+
 // updates deviceInfo with the commands' information of the IGD
 bool UPnP::getIGDEventURLs(gatewayInfo *deviceInfo)
 {
@@ -919,6 +1008,11 @@ bool UPnP::getIGDEventURLs(gatewayInfo *deviceInfo)
   UPNP_LOGINFO3(F("deviceInfo->actionPath :"), deviceInfo->actionPath, F(", deviceInfo->path :"), deviceInfo->path);
 
   // make an HTTP request
+
+// KH, Somehow nRF52 and STM32 WiFi (ESP8266/ESP32-AT and WiFiNINA) don't behave well with FlashString
+// Disable for nRF52 and STM32 WiFi now.
+#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET) )
+
   _UPnPClient.print(F("GET "));
   _UPnPClient.print(deviceInfo->path);
   _UPnPClient.println(F(" HTTP/1.1"));
@@ -935,6 +1029,21 @@ bool UPnP::getIGDEventURLs(gatewayInfo *deviceInfo)
 
   _UPnPClient.println(F("Content-Length: 0"));
   _UPnPClient.println();
+  
+#else
+
+  _UPnPClient.print("GET ");
+  _UPnPClient.print(deviceInfo->path);
+  _UPnPClient.println(" HTTP/1.1");
+  _UPnPClient.println("Content-Type: text/xml; charset=\"utf-8\"");
+  //_UPnPClient.println("Connection: close");
+
+  _UPnPClient.println("Host: " + IPAddresstoString(deviceInfo->host) + ":" + String(deviceInfo->actionPort));
+
+  _UPnPClient.println("Content-Length: 0");
+  _UPnPClient.println();
+    
+#endif  
 
   // wait for the response
   unsigned long timeout = millis();
@@ -1029,10 +1138,10 @@ bool UPnP::getIGDEventURLs(gatewayInfo *deviceInfo)
       {
         deviceInfo->actionPath = controlURLContent;
 
-        UPNP_LOGINFO1(F("controlURL tag found! setting actionPath to :"), controlURLContent);
+        UPNP_LOGINFO1(F("controlURL tag found! Setting actionPath to :"), controlURLContent);
 
         // clear buffer
-        UPNP_LOGDEBUG(F("Flushing the rest of the response"));
+        UPNP_LOGDEBUG(F("Flushing rest of response"));
 
         while (_UPnPClient.available())
         {
@@ -1048,11 +1157,13 @@ bool UPnP::getIGDEventURLs(gatewayInfo *deviceInfo)
   return false;
 }
 
+/////////////////////////////////////////////////////////////////////
+
 // assuming a connection to the IGD has been formed
 // will add the port mapping to the IGD
 bool UPnP::addPortMappingEntry(gatewayInfo *deviceInfo, upnpRule *rule_ptr)
 {
-  UPNP_LOGINFO(F("called addPortMappingEntry"));
+  UPNP_LOGINFO(F("Called addPortMappingEntry"));
 
   // connect to IGD (TCP connection) again, if needed, in case we got disconnected after the previous query
   unsigned long timeout = millis() + TCP_CONNECTION_TIMEOUT_MS;
@@ -1063,7 +1174,7 @@ bool UPnP::addPortMappingEntry(gatewayInfo *deviceInfo, upnpRule *rule_ptr)
     {
       if (millis() > timeout)
       {
-        UPNP_LOGDEBUG(F("Timeout connect to the IGD"));
+        UPNP_LOGDEBUG(F("Timeout connect to IGD"));
 
         _UPnPClient.stop();
         return false;
@@ -1074,6 +1185,10 @@ bool UPnP::addPortMappingEntry(gatewayInfo *deviceInfo, upnpRule *rule_ptr)
   }
 
   UPNP_LOGINFO3(F("deviceInfo->actionPath :"), deviceInfo->actionPath, F(", deviceInfo->serviceTypeName :"), deviceInfo->serviceTypeName);
+
+// KH, Somehow nRF52 and STM32 WiFi (ESP8266/ESP32-AT and WiFiNINA) don't behave well with FlashString
+// Disable for nRF52 and STM32 WiFi now.
+#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET) )
 
   strcpy_P(body_tmp, PSTR("<?xml version=\"1.0\"?><s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"><s:Body><u:AddPortMapping xmlns:u=\""));
   strcat_P(body_tmp, deviceInfo->serviceTypeName.c_str());
@@ -1132,8 +1247,66 @@ bool UPnP::addPortMappingEntry(gatewayInfo *deviceInfo, upnpRule *rule_ptr)
 
   _UPnPClient.println(body_tmp);
   _UPnPClient.println();
+  
+#else
 
-  UPNP_LOGDEBUG1(F("Content-Length was: "), integer_string);
+  strcpy(body_tmp, "<?xml version=\"1.0\"?><s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"><s:Body><u:AddPortMapping xmlns:u=\"");
+  strcat(body_tmp, deviceInfo->serviceTypeName.c_str());
+  strcat(body_tmp, "\"><NewRemoteHost></NewRemoteHost><NewExternalPort>");
+  sprintf(integer_string, "%d", rule_ptr->internalPort);
+  strcat(body_tmp, integer_string);
+  strcat(body_tmp, "</NewExternalPort><NewProtocol>");
+  strcat(body_tmp, rule_ptr->protocol.c_str());
+  strcat(body_tmp, "</NewProtocol><NewInternalPort>");
+  sprintf(integer_string, "%d", rule_ptr->internalPort);
+  strcat(body_tmp, integer_string);
+  strcat(body_tmp, "</NewInternalPort><NewInternalClient>");
+
+#if UPNP_USING_ETHERNET
+  IPAddress ipAddress = (rule_ptr->internalAddr == ipNull) ? Ethernet.localIP() : rule_ptr->internalAddr;
+#else
+  IPAddress ipAddress = (rule_ptr->internalAddr == ipNull) ? WiFi.localIP() : rule_ptr->internalAddr;
+#endif
+
+  strcat(body_tmp, IPAddresstoString(ipAddress).c_str());
+
+  strcat(body_tmp, "</NewInternalClient><NewEnabled>1</NewEnabled><NewPortMappingDescription>");
+  strcat(body_tmp, rule_ptr->devFriendlyName.c_str());
+  strcat(body_tmp, "</NewPortMappingDescription><NewLeaseDuration>");
+  sprintf(integer_string, "%d", rule_ptr->leaseDuration);
+  strcat(body_tmp, integer_string);
+  strcat(body_tmp, "</NewLeaseDuration></u:AddPortMapping></s:Body></s:Envelope>");
+
+  sprintf(integer_string, "%d", strlen(body_tmp));
+
+  _UPnPClient.print("POST ");
+  _UPnPClient.print(deviceInfo->actionPath);
+  _UPnPClient.println(" HTTP/1.1");
+  //_UPnPClient.println("Connection: close");
+  _UPnPClient.println("Content-Type: text/xml; charset=\"utf-8\"");
+
+#if (ESP32 || ESP8266)
+  _UPnPClient.println("Host: " + deviceInfo->host.toString() + ":" + String(deviceInfo->actionPort));
+#else
+  _UPnPClient.println("Host: " + IPAddresstoString(deviceInfo->host) + ":" + String(deviceInfo->actionPort));
+#endif
+
+  //_UPnPClient.println("Accept: */*");
+  //_UPnPClient.println("Content-Type: application/x-www-form-urlencoded");
+  _UPnPClient.print("SOAPAction: \"");
+  _UPnPClient.print(deviceInfo->serviceTypeName);
+  _UPnPClient.println("#AddPortMapping\"");
+
+  _UPnPClient.print("Content-Length: ");
+  _UPnPClient.println(integer_string);
+  _UPnPClient.println();
+
+  _UPnPClient.println(body_tmp);
+  _UPnPClient.println();
+  
+#endif  
+
+  UPNP_LOGDEBUG1(F("Content-Length :"), integer_string);
   UPNP_LOGDEBUG(body_tmp);
 
   timeout = millis();
@@ -1175,13 +1348,15 @@ bool UPnP::addPortMappingEntry(gatewayInfo *deviceInfo, upnpRule *rule_ptr)
   return isPORT_MAP_SUCCESS;
 }
 
+/////////////////////////////////////////////////////////////////////
+
 bool UPnP::printAllPortMappings()
 {
   // verify gateway information is valid
   // TODO: use this _gwInfo to skip the UDP part completely if it is not empty
   if (!isGatewayInfoValid(&_gwInfo))
   {
-    UPNP_LOGINFO(F("Invalid router info, cannot continue"));
+    UPNP_LOGINFO(F("Invalid router info, can't continue"));
 
     return false;
   }
@@ -1202,7 +1377,7 @@ bool UPnP::printAllPortMappings()
       {
         if (_timeoutMs > 0 && (millis() - startTime > _timeoutMs))
         {
-          UPNP_LOGINFO(F("Timeout connect to the IGD"));
+          UPNP_LOGINFO(F("Timeout connect to IGD"));
 
           _UPnPClient.stop();
           return false;
@@ -1212,6 +1387,10 @@ bool UPnP::printAllPortMappings()
     }
 
     UPNP_LOGINFO1(F("Sending query for index :"), index);
+    
+// KH, Somehow nRF52 and STM32 WiFi (ESP8266/ESP32-AT and WiFiNINA) don't behave well with FlashString
+// Disable for nRF52 and STM32 WiFi now.
+#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET) )    
 
     strcpy_P(body_tmp, PSTR("<?xml version=\"1.0\"?>"
                             "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">"
@@ -1256,6 +1435,47 @@ bool UPnP::printAllPortMappings()
     _UPnPClient.println(body_tmp);
     _UPnPClient.println();
 
+#else
+
+    strcpy(body_tmp, "<?xml version=\"1.0\"?>"
+                            "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">"
+                            "<s:Body>"
+                            "<u:GetGenericPortMappingEntry xmlns:u=\"");
+    strcat(body_tmp, _gwInfo.serviceTypeName.c_str());
+    strcat(body_tmp, "\">"
+                            "  <NewPortMappingIndex>");
+
+    sprintf(integer_string, "%d", index);
+    strcat(body_tmp, integer_string);
+    strcat(body_tmp, "</NewPortMappingIndex>"
+                            "</u:GetGenericPortMappingEntry>"
+                            "</s:Body>"
+                            "</s:Envelope>");
+
+    sprintf(integer_string, "%d", strlen(body_tmp));
+
+    _UPnPClient.print("POST ");
+    _UPnPClient.print(_gwInfo.actionPath);
+    _UPnPClient.println(" HTTP/1.1");
+    _UPnPClient.println("Connection: keep-alive");
+    _UPnPClient.println("Content-Type: text/xml; charset=\"utf-8\"");
+
+    _UPnPClient.println("Host: " + String(_gwInfo.host) + ":" + String(_gwInfo.actionPort));
+    UPNP_LOGINFO("Host: " + IPAddresstoString(_gwInfo.host) + ":" + String(_gwInfo.actionPort));
+
+    _UPnPClient.print("SOAPAction: \"");
+    _UPnPClient.print(_gwInfo.serviceTypeName);
+    _UPnPClient.println("#GetGenericPortMappingEntry\"");
+
+    _UPnPClient.print("Content-Length: ");
+    _UPnPClient.println(integer_string);
+    _UPnPClient.println();
+
+    _UPnPClient.println(body_tmp);
+    _UPnPClient.println();
+    
+#endif
+
     unsigned long timeout = millis();
 
     while (_UPnPClient.available() == 0)
@@ -1287,7 +1507,7 @@ bool UPnP::printAllPortMappings()
       }
       else if (line.indexOf(F("HTTP/1.1 500 ")) >= 0)
       {
-        UPNP_LOGDEBUG(F("Internal server error, likely because we have shown all the mappings"));
+        UPNP_LOGDEBUG(F("Internal server error, likely we got all the mappings"));
 
         reachedEnd = true;
       }
@@ -1350,6 +1570,8 @@ bool UPnP::printAllPortMappings()
   return true;
 }
 
+/////////////////////////////////////////////////////////////////////
+
 void UPnP::printPortMappingConfig()
 {
   UPNP_LOGINFO(F("UPnP configured port mappings:"));
@@ -1362,6 +1584,8 @@ void UPnP::printPortMappingConfig()
     currRuleNode = currRuleNode->next;
   }
 }
+
+/////////////////////////////////////////////////////////////////////
 
 // TODO: remove use of String
 void UPnP::upnpRuleToString(upnpRule *rule_ptr)
@@ -1408,6 +1632,8 @@ void UPnP::upnpRuleToString(upnpRule *rule_ptr)
   UPNP_LOGWARN0(leaseDuration + getSpacesString(7 - leaseDuration.length()) + "\n");
 }
 
+/////////////////////////////////////////////////////////////////////
+
 String UPnP::getSpacesString(int num)
 {
   if (num < 0)
@@ -1425,6 +1651,8 @@ String UPnP::getSpacesString(int num)
   return spaces;
 }
 
+/////////////////////////////////////////////////////////////////////
+
 /*
   char* UPnP::ipAddressToCharArr(IPAddress ipAddress)
   {
@@ -1433,6 +1661,8 @@ String UPnP::getSpacesString(int num)
     s[16] = '\0';
     return s;
   }*/
+
+/////////////////////////////////////////////////////////////////////
 
 IPAddress UPnP::getHost(String url)
 {
@@ -1466,6 +1696,8 @@ IPAddress UPnP::getHost(String url)
 
   return result;
 }
+
+/////////////////////////////////////////////////////////////////////
 
 int UPnP::getPort(String url)
 {
@@ -1504,6 +1736,8 @@ int UPnP::getPort(String url)
   return port;
 }
 
+/////////////////////////////////////////////////////////////////////
+
 String UPnP::getPath(String url)
 {
   if (url.indexOf(F("https://")) != -1)
@@ -1520,7 +1754,7 @@ String UPnP::getPath(String url)
 
   if (firstSlashIndex == -1)
   {
-    UPNP_LOGDEBUG("ERROR: Cannot find path in url [" + url + "]");
+    UPNP_LOGDEBUG("ERROR: Can't find path in url [" + url + "]");
 
     return "";
   }
@@ -1528,13 +1762,15 @@ String UPnP::getPath(String url)
   return url.substring(firstSlashIndex, url.length());
 }
 
+/////////////////////////////////////////////////////////////////////
+
 String UPnP::getTagContent(const String &line, String tagName)
 {
   int startIndex = line.indexOf("<" + tagName + ">");
 
   if (startIndex == -1)
   {
-    UPNP_LOGDEBUG3(F("ERROR: Cannot find tag content in line :"), line, F(" for start tag :"), tagName);
+    UPNP_LOGDEBUG3(F("ERROR: Can't find tag content in line :"), line, F(" for start tag :"), tagName);
 
     return "";
   }
@@ -1544,7 +1780,7 @@ String UPnP::getTagContent(const String &line, String tagName)
 
   if (endIndex == -1)
   {
-    UPNP_LOGDEBUG3(F("ERROR: Cannot find tag content in line :"), line, F(" for end tag :"), tagName);
+    UPNP_LOGDEBUG3(F("ERROR: Can't find tag content in line :"), line, F(" for end tag :"), tagName);
 
     return "";
   }

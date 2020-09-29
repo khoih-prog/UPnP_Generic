@@ -10,17 +10,22 @@
   Based on and modified from Ofek Pearl's TinyUPnP Library (https://github.com/ofekp/TinyUPnP)
   Built by Khoi Hoang https://github.com/khoih-prog/UPnP_Generic
   Licensed under MIT license
-  Version: 3.1.4
+  Version: 3.1.5
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   3.1.4  K Hoang      23/09/2020 Initial coding for Generic boards using many WiFi/Ethernet modules/shields.
+  3.1.5  K Hoang      28/09/2020 Fix issue with nRF52 and STM32F/L/H/G/WB/MP1 using ESP8266/ESP32-AT
  *****************************************************************************************************************************/
 /*
   Note: This example uses the DDNS_Generic library (https://github.com/khoih-prog/DDNS_Generic)
         You can access this WebServer by either localIP:LISTEN_PORT such as 192.169.2.100:8266
         or DDNS_Host:LISTEN_PORT, such as account.duckdns.org:8266
 */
+
+#if !defined(ESP8266)
+  #error This code is intended to run on the ESP8266 platform! Please check your Tools->Board setting. 
+#endif
 
 // Debug Level from 0 to 4
 #define _DDNS_GENERIC_LOGLEVEL_     1
@@ -64,8 +69,8 @@ void handleRoot()
   int hr = min / 60;
   int day = hr / 24;
 
-  snprintf(temp, BUFFER_SIZE - 1,
-           "<html>\
+  snprintf_P(temp, BUFFER_SIZE - 1,
+           PSTR("<html>\
 <head>\
 <meta http-equiv='refresh' content='5'/>\
 <title>%s</title>\
@@ -78,31 +83,31 @@ body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Col
 <h3>running UPnP_Generic & DDNS_Generic</h3>\
 <p>Uptime: %d d %02d:%02d:%02d</p>\
 </body>\
-</html>", ARDUINO_BOARD, ARDUINO_BOARD, day, hr, min % 60, sec % 60);
+</html>"), ARDUINO_BOARD, ARDUINO_BOARD, day, hr, min % 60, sec % 60);
 
-  server.send(200, "text/html", temp);
+  server.send(200, F("text/html"), temp);
   digitalWrite(LED_BUILTIN, 0);
 }
 
 void handleNotFound() 
 {
   digitalWrite(LED_BUILTIN, 1);
-  String message = "File Not Found\n\n";
+  String message = F("File Not Found\n\n");
   
-  message += "URI: ";
+  message += F("URI: ");
   message += server.uri();
-  message += "\nMethod: ";
-  message += (server.method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
+  message += F("\nMethod: ");
+  message += (server.method() == HTTP_GET) ? F("GET") : F("POST");
+  message += F("\nArguments: ");
   message += server.args();
-  message += "\n";
+  message += F("\n");
   
   for (uint8_t i = 0; i < server.args(); i++) 
   {
     message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   
-  server.send(404, "text/plain", message);
+  server.send(404, F("text/plain"), message);
   digitalWrite(LED_BUILTIN, 0);
 }
 
@@ -188,29 +193,34 @@ void setup(void)
 
     uPnP->printAllPortMappings();
 
-    Serial.println("\nUPnP done");
+    Serial.println(F("\nUPnP done"));
   }
   
-  server.on("/", handleRoot);
+  server.on(F("/"), handleRoot);
 
-  server.on("/inline", []()
+  server.on(F("/inline"), []()
   {
-    server.send(200, "text/plain", "this works as well");
+    server.send(200, F("text/plain"), F("This works as well"));
   });
 
   server.onNotFound(handleNotFound);
 
   server.begin();
   
-  Serial.print(F("HTTP EthernetWebServer is @ IP : "));
+  Serial.print(F("HTTP WiFiWebServer is @ IP : "));
   Serial.print(localIP); 
-  Serial.print(", port = ");
+  Serial.print(F(", port = "));
   Serial.println(LISTEN_PORT);
+
+  Serial.print(F("Gateway Address: "));
+  Serial.println(WiFi.gatewayIP());
+  Serial.print(F("Network Mask: "));
+  Serial.println(WiFi.subnetMask());
 }
 
 void loop(void) 
 {
-  DDNSGeneric.update(300000);
+  DDNSGeneric.update(555000);
 
   uPnP->updatePortMappings(600000);  // 10 minutes
 
