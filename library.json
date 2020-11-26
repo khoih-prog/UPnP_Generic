@@ -24,7 +24,45 @@
       "extras",
       "tests"
     ]
-  },  
+  },
+  "dependencies": [
+    {
+      "owner": "khoih.prog",
+      "name": "WiFiNINA_Generic",
+      "version": "^1.8.0",
+      "platforms": ["*"]
+    },
+    {
+      "owner": "khoih-prog",
+      "name": "EthernetWebServer",
+      "version": "^1.1.0",
+      "platforms": ["*"]
+    },
+    {
+      "owner": "khoih-prog",
+      "name": "EthernetWebServer_STM32",
+      "version": "^1.1.0",
+      "platforms": ["*"]
+    },
+    {
+      "owner": "khoih-prog",
+      "name": "WiFiWebServer",
+      "version": "^1.1.0",
+      "platforms": ["*"]
+    },
+    {
+      "owner": "khoih-prog",
+      "name": "ESP8266_AT_WebServer",
+      "version": "^1.1.1",
+      "platforms": ["*"]
+    },
+    {
+      "owner": "khoih.prog",
+      "name": "DDNS_Generic",
+      "version": "^1.0.1",
+      "platforms": ["*"]
+    }
+  ],
   "frameworks": "*",
   "platforms": "*",
   "examples": "examples/*/*/*.ino"
