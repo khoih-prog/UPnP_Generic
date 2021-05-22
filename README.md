@@ -1434,7 +1434,7 @@ If you want to contribute to this project:
 
 ### License
 
-- The library is licensed under [MIT](https://github.com/khoih-prog/UPnP_Generic/blob/master/LICENSE)
+- The library is licensed under [GPLv3.0](https://github.com/khoih-prog/UPnP_Generic/blob/master/LICENSE)
 
 ---
 
