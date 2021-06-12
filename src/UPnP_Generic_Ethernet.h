@@ -1,75 +1,28 @@
 /****************************************************************************************************************************
   UPnP_Generic_Ethernet.h
   
-  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1
-  with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266-AT, W5x00 Ethernet shields
+  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1,Teensy
+  with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266/ESP32-AT, W5x00, ENC28J60, Native Ethernet shields
   
   DDNS_Generic is a library to automatically add port mappings to router using UPnP SSDP
   (Simple Service Discovery Protocol) in order to provide access to the local Web Services from the Internet.
   
   Based on and modified from Ofek Pearl's TinyUPnP Library (https://github.com/ofekp/TinyUPnP)
   Built by Khoi Hoang https://github.com/khoih-prog/UPnP_Generic
-  Licensed under MIT license
-  Version: 3.1.5
+  Licensed under GPL-3.0 license
+  Version: 3.2.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   3.1.4  K Hoang      23/09/2020 Initial coding for Generic boards using many WiFi/Ethernet modules/shields.
   3.1.5  K Hoang      28/09/2020 Fix issue with nRF52 and STM32F/L/H/G/WB/MP1 using ESP8266/ESP32-AT
+  3.2.0  K Hoang      11/06/2021 Add support to RP2040-based boards using ESP-AT, WiFiNINA, W5x00 / ENC28J60
  *****************************************************************************************************************************/
  
 #ifndef UPnP_Generic_Ethernet_h
 #define UPnP_Generic_Ethernet_h
 
 #include <Arduino.h>
-
-#if ( USE_ETHERNET2 || USE_ETHERNET3 || USE_ETHERNET_LARGE || USE_ETHERNET_ESP8266 || USE_ETHERNET_ENC )
-  #ifdef USE_CUSTOM_ETHERNET
-    #undef USE_CUSTOM_ETHERNET
-  #endif
-  #define USE_CUSTOM_ETHERNET   false
-#endif
-
-#if (USE_BUILTIN_ETHERNET)
-  #include <LwIP.h>
-  #include <STM32Ethernet.h>
-  #warning Using LAN8742A Ethernet & STM32Ethernet lib
-  #define SHIELD_TYPE           "LAN8742A Ethernet & STM32Ethernet Library"
-#elif (USE_UIP_ETHERNET)
-  #include "UIPEthernet.h"
-  #warning Using ENC28J60 & UIPEthernet lib
-  #define SHIELD_TYPE           "ENC28J60 & UIPEthernet Library"
-#elif USE_ETHERNET3
-  #include "Ethernet3.h"
-  #warning Using W5x00 & Ethernet3 lib
-  #define SHIELD_TYPE           "W5x00 & Ethernet3 Library"
-#elif USE_ETHERNET2
-  #include "Ethernet2.h"
-  #warning Using W5x00 & Ethernet2 lib
-  #define SHIELD_TYPE           "W5x00 & Ethernet2 Library"
-#elif USE_ETHERNET_LARGE
-  #include "EthernetLarge.h"
-  #warning Using W5x00 & EthernetLarge lib
-  #define SHIELD_TYPE           "W5x00 & EthernetLarge Library"
-#elif USE_ETHERNET_ESP8266
-  #include "Ethernet_ESP8266.h"
-  #warning Using W5x00 & Ethernet_ESP8266 lib 
-  #define SHIELD_TYPE           "W5x00 & Ethernet_ESP8266 Library" 
-#elif USE_ETHERNET_ENC
-  #include "EthernetENC.h"
-  #warning Using ENC28J60 & EthernetENC lib
-  #define SHIELD_TYPE           "ENC28J60 & EthernetENC Library"
-#elif USE_CUSTOM_ETHERNET
-  //#include "Ethernet_XYZ.h"
-  #include "EthernetENC.h"
-  #warning Using Custom Ethernet library. You must include a library and initialize.
-  #define SHIELD_TYPE           "Custom Ethernet & Ethernet_XYZ Library"
-#else
-  #define USE_ETHERNET          true
-  #include "Ethernet.h"
-  #warning Using Ethernet lib
-  #define SHIELD_TYPE           "W5x00 & Ethernet Library"
-#endif
 
 #include <limits.h>
 

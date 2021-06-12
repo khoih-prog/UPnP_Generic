@@ -1,8 +1,8 @@
 /****************************************************************************************************************************
   defines.h
   
-  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1
-  with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266-AT, W5x00 Ethernet shields
+  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1,Teensy
+  with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266/ESP32-AT, W5x00, ENC28J60, Native Ethernet shields
   
   DDNS_Generic is a library to automatically add port mappings to router using UPnP SSDP
   (Simple Service Discovery Protocol) in order to provide access to the local Web Services from the Internet.
@@ -10,12 +10,6 @@
   Based on and modified from Ofek Pearl's TinyUPnP Library (https://github.com/ofekp/TinyUPnP)
   Built by Khoi Hoang https://github.com/khoih-prog/UPnP_Generic
   Licensed under MIT license
-  Version: 3.1.5
-  
-  Version Modified By   Date      Comments
-  ------- -----------  ---------- -----------
-  3.1.4  K Hoang      23/09/2020 Initial coding for Generic boards using many WiFi/Ethernet modules/shields.
-  3.1.5  K Hoang      28/09/2020 Fix issue with nRF52 and STM32F/L/H/G/WB/MP1 using ESP8266/ESP32-AT
  *****************************************************************************************************************************/
 
 #ifndef defines_h
@@ -24,10 +18,10 @@
 #define DEBUG_ESP8266_AT_WEBSERVER_PORT Serial
 
 // Debug Level from 0 to 4
-#define _ESP_AT_LOGLEVEL_           1
+#define _ESP_AT_LOGLEVEL_           3
 
 #define _DDNS_GENERIC_LOGLEVEL_     1
-#define _UPNP_LOGLEVEL_             2
+#define _UPNP_LOGLEVEL_             3
 
 // Select DDNS_USING_WIFI for boards using built-in WiFi, such as Nano-33-IoT
 #define DDNS_USING_WIFI             true
@@ -146,7 +140,9 @@
 
 #include <DDNS_Generic.h>
 
-char ssid[] = "****";        // your network SSID (name)
-char pass[] = "****";        // your network password
+char ssid[] = "HueNet1";        // your network SSID (name)
+char pass[] = "jenniqqs";        // your network password
+//char ssid[] = "****";        // your network SSID (name)
+//char pass[] = "****";        // your network password
 
 #endif    //defines_h

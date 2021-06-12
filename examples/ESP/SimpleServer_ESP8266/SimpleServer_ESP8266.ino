@@ -10,12 +10,13 @@
   Based on and modified from Ofek Pearl's TinyUPnP Library (https://github.com/ofekp/TinyUPnP)
   Built by Khoi Hoang https://github.com/khoih-prog/UPnP_Generic
   Licensed under MIT license
-  Version: 3.1.5
+  Version: 3.2.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   3.1.4  K Hoang      23/09/2020 Initial coding for Generic boards using many WiFi/Ethernet modules/shields.
   3.1.5  K Hoang      28/09/2020 Fix issue with nRF52 and STM32F/L/H/G/WB/MP1 using ESP8266/ESP32-AT
+  3.2.0  K Hoang      11/06/2021 Add support to RP2040-based boards using ESP-AT, WiFiNINA, W5x00 / ENC28J60
  *****************************************************************************************************************************/
 /*
   Note: This example uses the DDNS_Generic library (https://github.com/khoih-prog/DDNS_Generic)
@@ -46,7 +47,7 @@ const char* password  = "12345678";
 
 #define LISTEN_PORT         8266
 #define LEASE_DURATION      36000  // seconds
-#define FRIENDLY_NAME       "ESP8266-WIFI"  // this name will appear in your router port forwarding section
+#define FRIENDLY_NAME       ARDUINO_BOARD "-WIFI"   // this name will appear in your router port forwarding section
 
 UPnP* uPnP;
 
@@ -54,7 +55,9 @@ ESP8266WebServer server(LISTEN_PORT);
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
-  Serial.print("DDNSGeneric - IP Change Detected: ");
+  (void) oldIP;
+  
+  Serial.print(F("DDNSGeneric - IP Change Detected: "));
   Serial.println(newIP);
 }
 
@@ -68,6 +71,8 @@ void handleRoot()
   int min = sec / 60;
   int hr = min / 60;
   int day = hr / 24;
+
+  hr = hr % 24;
 
   snprintf_P(temp, BUFFER_SIZE - 1,
            PSTR("<html>\
@@ -119,7 +124,8 @@ void setup(void)
   Serial.begin(115200);
   while (!Serial);
 
-  Serial.println("\nStart SimpleServerESP8266 on " + String(ARDUINO_BOARD));
+  Serial.print("\nStart SimpleServerESP8266 on "); Serial.println(ARDUINO_BOARD);
+  Serial.println(UPNP_GENERIC_VERSION);
   
   Serial.print("Connecting to ");
   Serial.println(ssid);

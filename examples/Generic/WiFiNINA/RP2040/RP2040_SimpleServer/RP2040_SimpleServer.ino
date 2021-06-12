@@ -1,7 +1,7 @@
 /****************************************************************************************************************************
-  SAMD_PWM_LEDServer.ino
+  RP2040_SimpleServer.ino
   
-  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1
+  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1, RP2040-based
   with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266-AT, W5x00 Ethernet shields
   
   DDNS_Generic is a library to automatically add port mappings to router using UPnP SSDP
@@ -20,8 +20,8 @@
  *****************************************************************************************************************************/
 /*
   Note: This example uses the DDNS_Generic library (https://github.com/khoih-prog/DDNS_Generic)
-        You can access this WebServer by either localIP:LISTEN_PORT such as 192.169.2.100:5996/?percentage=20
-        or DDNS_Host:LISTEN_PORT, such as account.duckdns.org:5996/?percentage=20
+        You can access this WebServer by either localIP:LISTEN_PORT such as 192.169.2.100:6052
+        or DDNS_Host:LISTEN_PORT, such as account.duckdns.org:6052
 */
 
 #include "defines.h"
@@ -31,23 +31,23 @@
 
 #include <UPnP_Generic.h>
 
-#define LISTEN_PORT         5996
+#define LISTEN_PORT         6052
 #define LEASE_DURATION      36000  // seconds
-#define FRIENDLY_NAME       "SAMD-LED-WIFININA"  // this name will appear in your router port forwarding section
+#define FRIENDLY_NAME       "RP2040-WIFININA"  // this name will appear in your router port forwarding section
 
 UPnP* uPnP;
 
 WiFiWebServer server(LISTEN_PORT);
 
+#if defined(LED_BLUE)
+  #define LED_PIN           2               //  BLUE_LED
+#else
+  #define LED_PIN           3               //  RED LED
+#endif
+
+const int led = LED_PIN;
+
 int status    = WL_IDLE_STATUS;     // the Wifi radio's status
-
-#define LED_REVERSED      false
-#define LED_ON            100
-#define LED_OFF           0
-
-#define LED_PIN           13     // LED_BUILTIN
-
-const int delayval = 10;
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
@@ -55,87 +55,43 @@ void onUpdateCallback(const char* oldIP, const char* newIP)
   Serial.println(newIP);
 }
 
-// 0 <= percentage <= 100
-void setPower(uint32_t percentage)
-{
-  long pwm_val = map(percentage, LED_OFF, LED_ON, 0, 1023);
-
-  if (pwm_val > 1023)
-  {
-    pwm_val = 1023;
-  }
-
-  analogWrite(LED_PIN, pwm_val);
-}
-
-void fadeOn(void)
-{
-#if LED_REVERSED  
-  for (int i = 100; i >= 0; i--)
-#else  
-  for (int i = 0; i < 100; i++)
-#endif
-  {
-    setPower(i);
-    delay(delayval);
-  }
-}
-
-void fadeOff(void)
-{
-#if LED_REVERSED  
-  for (int i = 0; i < 100; i++)
-#else  
-  for (int i = 100; i >= 0; i--)
-#endif  
-  {
-    setPower(i);
-    delay(delayval);
-  }
-}
-
-void showLED(void)
-{
-  for (int i = 0; i < 2; i++)
-  {  
-    fadeOn();
-    fadeOff(); 
-  }
-}
-  
 void handleRoot()
 {
-  String message = F("Hello from ");
+#define BUFFER_SIZE     400
+  
+  digitalWrite(led, 1);
+  char temp[BUFFER_SIZE];
+  int sec = millis() / 1000;
+  int min = sec / 60;
+  int hr = min / 60;
+  int day = hr / 24;
 
-  message += String(BOARD_NAME);
-  message += F(" running UPnP_Generic & DDNS_Generic\n");
-  message += F("on ");
-  message += String(SHIELD_TYPE);
-  message += F("\nNumber of args received: ");
-  message += server.args();  // get number of parameters
-  message += F("\n");
+  hr = hr % 24;
 
-  int percentage = 0;
+  snprintf(temp, BUFFER_SIZE - 1,
+           "<html>\
+<head>\
+<meta http-equiv='refresh' content='5'/>\
+<title>%s</title>\
+<style>\
+body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }\
+</style>\
+</head>\
+<body>\
+<h1>Hello from %s</h1>\
+<h3>running UPnP_Generic & DDNS_Generic</h3>\
+<h3>on %s</h3>\
+<p>Uptime: %d d %02d:%02d:%02d</p>\
+</body>\
+</html>", BOARD_NAME, BOARD_NAME, SHIELD_TYPE, day, hr, min % 60, sec % 60);
 
-  for (int i = 0; i < server.args(); i++)
-  {
-    message += "Arg #" + (String)i + " => ";
-    message += server.argName(i) + ": ";  // get the name of the parameter
-    message += server.arg(i) + "\n";  // get the value of the parameter
-
-    if (server.argName(i).equals("percentage"))
-    {
-      percentage = server.arg(i).toInt();
-    }
-  }
-
-  server.send(200, F("text/plain"), message);       //Response to the HTTP request
-
-  setPower(percentage);
+  server.send(200, F("text/html"), temp);
+  digitalWrite(led, 0);
 }
 
 void handleNotFound() 
 {
+  digitalWrite(led, 1);
   String message = F("File Not Found\n\n");
   
   message += F("URI: ");
@@ -152,20 +108,20 @@ void handleNotFound()
   }
   
   server.send(404, F("text/plain"), message);
+  digitalWrite(led, 0);
 }
 
 void setup(void) 
-{ 
+{
+  pinMode(led, OUTPUT);
+  digitalWrite(led, 0);
+  
   Serial.begin(115200);
   while (!Serial);
 
-  Serial.print("\nStart SAMD_PWM_LEDServer on "); Serial.print(BOARD_NAME);
+  Serial.print("\nStart RP2040_SimpleServer on "); Serial.print(BOARD_NAME);
   Serial.print(" using "); Serial.println(SHIELD_TYPE);
   Serial.println(UPNP_GENERIC_VERSION);
-
-  pinMode(LED_PIN,OUTPUT);
-
-  showLED();
 
   // check for the presence of the shield
 #if USE_WIFI_NINA
@@ -260,9 +216,7 @@ void setup(void)
 
     Serial.println(F("\nUPnP done"));
   }
-
-  showLED();
-
+  
   server.on(F("/"), handleRoot);
 
   server.on(F("/inline"), []()
@@ -274,7 +228,7 @@ void setup(void)
 
   server.begin();
   
-  Serial.print(F("HTTP WiFiNINA_WebServer is @ IP : "));
+  Serial.print(F("HTTP WiFiWebServer is @ IP : "));
   Serial.print(localIP); 
   Serial.print(F(", port = "));
   Serial.println(LISTEN_PORT);

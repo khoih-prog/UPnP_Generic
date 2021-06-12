@@ -32,7 +32,7 @@
 
 #define LISTEN_PORT         5953
 #define LEASE_DURATION      36000  // seconds
-#define FRIENDLY_NAME       "NRF52-LED-W5X00"  // this name will appear in your router port forwarding section
+#define FRIENDLY_NAME       "RP2040-LED-W5X00"  // this name will appear in your router port forwarding section
 
 UPnP* uPnP;
 
@@ -49,7 +49,7 @@ EthernetWebServer server(LISTEN_PORT);
 #endif
 
 #if defined(LED_BLUE)
-  #define LED_PIN           LED_BLUE        //  BLUE_LED on nRF52840 Feather Express, Itsy-Bitsy
+  #define LED_PIN           2               //  BLUE_LED
 #else
   #define LED_PIN           3               //  RED LED
 #endif
@@ -170,40 +170,57 @@ void setup(void)
   Serial.begin(115200);
   while (!Serial);
 
-  Serial.print("\nStart nRF52_PWM_LEDServer on "); Serial.print(BOARD_NAME);
+  Serial.print("\nStart RP2040_PWM_LEDServer on "); Serial.print(BOARD_NAME);
   Serial.print(" using "); Serial.println(SHIELD_TYPE);
   Serial.println(UPNP_GENERIC_VERSION);
 
-  ET_LOGWARN3(F("Board :"), BOARD_NAME, F(", setCsPin:"), USE_THIS_SS_PIN);
+  ET_LOGERROR3(F("Board :"), BOARD_NAME, F(", setCsPin:"), USE_THIS_SS_PIN);
 
-  ET_LOGWARN(F("Default SPI pinout:"));
-  ET_LOGWARN1(F("MOSI:"), MOSI);
-  ET_LOGWARN1(F("MISO:"), MISO);
-  ET_LOGWARN1(F("SCK:"),  SCK);
-  ET_LOGWARN1(F("SS:"),   SS);
-  ET_LOGWARN(F("========================="));
-
+  Serial.println(F("Default SPI pinout:"));
+  Serial.print(F("MOSI:")); Serial.println(MOSI);
+  Serial.print(F("MISO:")); Serial.println(MISO);
+  Serial.print(F("SCK:"));  Serial.println(SCK);
+  Serial.print(F("SS:"));   Serial.println(SS);
+  Serial.println(F("========================="));
+      
 #if !(USE_BUILTIN_ETHERNET || USE_UIP_ETHERNET)
   // For other boards, to change if necessary
-#if ( USE_ETHERNET || USE_ETHERNET_LARGE || USE_ETHERNET2  || USE_ETHERNET_ENC )
-  // Must use library patch for Ethernet, Ethernet2, EthernetLarge libraries
-  Ethernet.init (USE_THIS_SS_PIN);
+  pinMode(USE_THIS_SS_PIN, OUTPUT);
+  digitalWrite(USE_THIS_SS_PIN, HIGH);
+  
+  // ETHERNET_USE_RPIPICO, use default SS = 5 or 17
+  #ifndef USE_THIS_SS_PIN
+    #if defined(ARDUINO_ARCH_MBED)
+      #define USE_THIS_SS_PIN   5     // For Arduino Mbed core
+    #else  
+      #define USE_THIS_SS_PIN   17    // For E.Philhower core
+    #endif
+  #endif
 
-#elif USE_ETHERNET3
-  // Use  MAX_SOCK_NUM = 4 for 4K, 2 for 8K, 1 for 16K RX/TX buffer
-#ifndef ETHERNET3_MAX_SOCK_NUM
-#define ETHERNET3_MAX_SOCK_NUM      4
-#endif
+  ET_LOGWARN1(F("RPIPICO setCsPin:"), USE_THIS_SS_PIN);
 
-  Ethernet.setCsPin (USE_THIS_SS_PIN);
-  Ethernet.init (ETHERNET3_MAX_SOCK_NUM);
-
-#elif USE_CUSTOM_ETHERNET
-  // You have to add initialization for your Custom Ethernet here
-  // This is just an example to setCSPin to USE_THIS_SS_PIN, and can be not correct and enough
-  //Ethernet.init(USE_THIS_SS_PIN);
-
-#endif  //( ( USE_ETHERNET || USE_ETHERNET_LARGE || USE_ETHERNET2  || USE_ETHERNET_ENC )
+  // For other boards, to change if necessary
+  #if ( USE_ETHERNET || USE_ETHERNET_LARGE || USE_ETHERNET2 || USE_ETHERNET_ENC )
+    // Must use library patch for Ethernet, EthernetLarge libraries
+    // For RPI Pico using Arduino Mbed RP2040 core
+    // SCK: GPIO2,  MOSI: GPIO3, MISO: GPIO4, SS/CS: GPIO5
+    // For RPI Pico using E. Philhower RP2040 core
+    // SCK: GPIO18,  MOSI: GPIO19, MISO: GPIO16, SS/CS: GPIO17
+    // Default pin 5/17 to SS/CS
+  
+    //Ethernet.setCsPin (USE_THIS_SS_PIN);
+    Ethernet.init (USE_THIS_SS_PIN);
+  
+  #elif USE_ETHERNET3
+    // Use  MAX_SOCK_NUM = 4 for 4K, 2 for 8K, 1 for 16K RX/TX buffer
+    #ifndef ETHERNET3_MAX_SOCK_NUM
+      #define ETHERNET3_MAX_SOCK_NUM      4
+    #endif
+  
+    Ethernet.setCsPin (USE_THIS_SS_PIN);
+    Ethernet.init (ETHERNET3_MAX_SOCK_NUM);
+    
+  #endif    //( USE_ETHERNET || USE_ETHERNET2 || USE_ETHERNET3 || USE_ETHERNET_LARGE )
 #endif
 
   // start the ethernet connection and the server:
@@ -214,6 +231,12 @@ void setup(void)
   Ethernet.begin(mac[index]);
 
   IPAddress localIP = Ethernet.localIP();
+
+  Serial.print(F("Using mac index = "));
+  Serial.println(index);
+
+  Serial.print(F("Connected! IP address: "));
+  Serial.println(localIP);
 
   ////////////////
 

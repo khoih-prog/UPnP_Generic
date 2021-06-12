@@ -1,8 +1,8 @@
 /****************************************************************************************************************************
   nRF52_PWM_LEDServer.ino
   
-  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1,Teensy
-  with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266/ESP32-AT, W5x00, ENC28J60, Native Ethernet shields
+  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1, RP2040-based
+  with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266-AT, W5x00 Ethernet shields
   
   DDNS_Generic is a library to automatically add port mappings to router using UPnP SSDP
   (Simple Service Discovery Protocol) in order to provide access to the local Web Services from the Internet.
@@ -20,23 +20,26 @@
  *****************************************************************************************************************************/
 /*
   Note: This example uses the DDNS_Generic library (https://github.com/khoih-prog/DDNS_Generic)
-        You can access this WebServer by either localIP:LISTEN_PORT such as 192.169.2.100:5953/?percentage=20
-        or DDNS_Host:LISTEN_PORT, such as account.duckdns.org:5953/?percentage=20
+        You can access this WebServer by either localIP:LISTEN_PORT such as 192.169.2.100:6053/?percentage=20
+        or DDNS_Host:LISTEN_PORT, such as account.duckdns.org:6053/?percentage=20
 */
 
 #include "defines.h"
 
-#define UPNP_USING_ETHERNET     true
+#define UPNP_USING_ETHERNET     false
+#define UPNP_USING_WIFI         true
 
 #include <UPnP_Generic.h>
 
-#define LISTEN_PORT         5953
+#define LISTEN_PORT         6053
 #define LEASE_DURATION      36000  // seconds
-#define FRIENDLY_NAME       "NRF52-LED-W5X00"  // this name will appear in your router port forwarding section
+#define FRIENDLY_NAME       "RP2040-LED-WIFININA"  // this name will appear in your router port forwarding section
 
 UPnP* uPnP;
 
-EthernetWebServer server(LISTEN_PORT);
+WiFiWebServer server(LISTEN_PORT);
+
+int status    = WL_IDLE_STATUS;     // the Wifi radio's status
 
 #define LED_REVERSED      false
 
@@ -49,7 +52,7 @@ EthernetWebServer server(LISTEN_PORT);
 #endif
 
 #if defined(LED_BLUE)
-  #define LED_PIN           LED_BLUE        //  BLUE_LED on nRF52840 Feather Express, Itsy-Bitsy
+  #define LED_PIN           2               //  BLUE_LED
 #else
   #define LED_PIN           3               //  RED LED
 #endif
@@ -161,62 +164,60 @@ void handleNotFound()
   server.send(404, F("text/plain"), message);
 }
 
-void setup(void)
-{
-  pinMode(LED_PIN, OUTPUT);
-  
-  showLED();
-  
+void setup(void) 
+{ 
   Serial.begin(115200);
   while (!Serial);
 
-  Serial.print("\nStart nRF52_PWM_LEDServer on "); Serial.print(BOARD_NAME);
+  Serial.print("\nStart RP2040_PWM_LEDServer on "); Serial.print(BOARD_NAME);
   Serial.print(" using "); Serial.println(SHIELD_TYPE);
   Serial.println(UPNP_GENERIC_VERSION);
 
-  ET_LOGWARN3(F("Board :"), BOARD_NAME, F(", setCsPin:"), USE_THIS_SS_PIN);
+  pinMode(LED_PIN,OUTPUT);
 
-  ET_LOGWARN(F("Default SPI pinout:"));
-  ET_LOGWARN1(F("MOSI:"), MOSI);
-  ET_LOGWARN1(F("MISO:"), MISO);
-  ET_LOGWARN1(F("SCK:"),  SCK);
-  ET_LOGWARN1(F("SS:"),   SS);
-  ET_LOGWARN(F("========================="));
+  showLED();
 
-#if !(USE_BUILTIN_ETHERNET || USE_UIP_ETHERNET)
-  // For other boards, to change if necessary
-#if ( USE_ETHERNET || USE_ETHERNET_LARGE || USE_ETHERNET2  || USE_ETHERNET_ENC )
-  // Must use library patch for Ethernet, Ethernet2, EthernetLarge libraries
-  Ethernet.init (USE_THIS_SS_PIN);
+  // check for the presence of the shield
+#if USE_WIFI_NINA
+  if (WiFi.status() == WL_NO_MODULE)
+#else
+  if (WiFi.status() == WL_NO_SHIELD)
+#endif
+  {
+    Serial.println(F("WiFi shield not present"));
+    // don't continue
+    while (true);
+  }
 
-#elif USE_ETHERNET3
-  // Use  MAX_SOCK_NUM = 4 for 4K, 2 for 8K, 1 for 16K RX/TX buffer
-#ifndef ETHERNET3_MAX_SOCK_NUM
-#define ETHERNET3_MAX_SOCK_NUM      4
+#if USE_WIFI_NINA
+  String fv = WiFi.firmwareVersion();
+  if (fv < WIFI_FIRMWARE_LATEST_VERSION)
+  {
+    Serial.println(F("Please upgrade the firmware"));
+  }
 #endif
 
-  Ethernet.setCsPin (USE_THIS_SS_PIN);
-  Ethernet.init (ETHERNET3_MAX_SOCK_NUM);
+  Serial.print(F("Connecting to "));
+  Serial.println(ssid);
+  
+  WiFi.begin(ssid, pass);
 
-#elif USE_CUSTOM_ETHERNET
-  // You have to add initialization for your Custom Ethernet here
-  // This is just an example to setCSPin to USE_THIS_SS_PIN, and can be not correct and enough
-  //Ethernet.init(USE_THIS_SS_PIN);
+  // Wait for connection
+  while (WiFi.status() != WL_CONNECTED) 
+  {
+    delay(500);
+    Serial.print(F("."));
+  }
+  
+  Serial.println();
 
-#endif  //( ( USE_ETHERNET || USE_ETHERNET_LARGE || USE_ETHERNET2  || USE_ETHERNET_ENC )
-#endif
-
-  // start the ethernet connection and the server:
-  // Use DHCP dynamic IP and random mac
-  uint16_t index = millis() % NUMBER_OF_MAC;
-  // Use Static IP
-  //Ethernet.begin(mac[index], ip);
-  Ethernet.begin(mac[index]);
-
-  IPAddress localIP = Ethernet.localIP();
+  IPAddress localIP = WiFi.localIP();
+  
+  Serial.print(F("IP address: "));
+  Serial.println(localIP);
 
   ////////////////
-
+  
   DDNSGeneric.service("duckdns");    // Enter your DDNS Service Name - "duckdns" / "noip"
 
   /*
@@ -232,7 +233,9 @@ void setup(void)
 
   ////////////////
 
-  uPnP = new UPnP(60000);  // -1 means blocking, preferably, use a timeout value (ms)
+  ////////////////
+
+  uPnP = new UPnP(30000);  // -1 means blocking, preferably, use a timeout value (ms)
 
   if (uPnP)
   {
@@ -281,21 +284,14 @@ void setup(void)
 
   server.begin();
   
-  Serial.print(F("HTTP EthernetWebServer is @ IP : "));
+  Serial.print(F("HTTP WiFiWebServer is @ IP : "));
   Serial.print(localIP); 
-  Serial.print(F(", port = "));
+  Serial.print(", port = ");
   Serial.println(LISTEN_PORT);
-
-  Serial.print(F("Gateway Address: "));
-  Serial.println(Ethernet.gatewayIP());
-  Serial.print(F("Network Mask: "));
-  Serial.println(Ethernet.subnetMask());
 }
 
 void loop(void) 
 {
-  //delay(100);
-  
   DDNSGeneric.update(300000);
 
   uPnP->updatePortMappings(600000);  // 10 minutes

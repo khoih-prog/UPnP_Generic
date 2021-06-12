@@ -1,21 +1,22 @@
 /****************************************************************************************************************************
   UPnP_Generic_Impl.h
   
-  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1
-  with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266-AT, W5x00 Ethernet shields
+  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1,Teensy
+  with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266/ESP32-AT, W5x00, ENC28J60, Native Ethernet shields
   
   DDNS_Generic is a library to automatically add port mappings to router using UPnP SSDP
   (Simple Service Discovery Protocol) in order to provide access to the local Web Services from the Internet.
   
   Based on and modified from Ofek Pearl's TinyUPnP Library (https://github.com/ofekp/TinyUPnP)
   Built by Khoi Hoang https://github.com/khoih-prog/UPnP_Generic
-  Licensed under MIT license
-  Version: 3.1.5
+  Licensed under GPL-3.0 license
+  Version: 3.2.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   3.1.4  K Hoang      23/09/2020 Initial coding for Generic boards using many WiFi/Ethernet modules/shields.
   3.1.5  K Hoang      28/09/2020 Fix issue with nRF52 and STM32F/L/H/G/WB/MP1 using ESP8266/ESP32-AT
+  3.2.0  K Hoang      11/06/2021 Add support to RP2040-based boards using ESP-AT, WiFiNINA, W5x00 / ENC28J60
  *****************************************************************************************************************************/
 
 #ifndef UPnP_Generic_Impl_h
@@ -475,7 +476,7 @@ bool UPnP::verifyPortMapping(gatewayInfo *deviceInfo, upnpRule *rule_ptr)
     return false;
   }
 
-  // TODO: extract the current lease duration and return it instead of a bool
+  // TODO: extract the current lease duration and return it instead of a boolreadStringUntil
   bool isPORT_MAP_SUCCESS = false;
   bool detectedChangedIP = false;
 
@@ -620,7 +621,7 @@ bool UPnP::applyActionOnSpecificPortMapping(SOAPAction *soapAction, gatewayInfo 
 
 // KH, Somehow nRF52 and STM32 WiFi (ESP8266/ESP32-AT and WiFiNINA) don't behave well with FlashString
 // Disable for nRF52 and STM32 WiFi now.
-#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET) )
+#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET && !UPNP_USING_NATIVE_ETHERNET) )
 
   strcpy_P(body_tmp, PSTR("<?xml version=\"1.0\"?>\r\n<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n<s:Body>\r\n<u:"));
   strcat_P(body_tmp, soapAction->name);
@@ -820,21 +821,24 @@ void UPnP::broadcastMSearch()
 
 // KH, Somehow nRF52 and STM32 WiFi (ESP8266/ESP32-AT and WiFiNINA) don't behave well with FlashString
 // Disable for nRF52 and STM32 WiFi now.
-#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET) )
+#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET && !UPNP_USING_NATIVE_ETHERNET) )
   strcpy_P(body_tmp, PSTR("M-SEARCH * HTTP/1.1\r\n"));
   strcat_P(body_tmp, PSTR("HOST: 239.255.255.250:1900\r\n"));
   strcat_P(body_tmp, PSTR("MAN: \"ssdp:discover\"\r\n"));
   strcat_P(body_tmp, PSTR("MX: 5\r\n"));
   strcat_P(body_tmp, PSTR("ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1\r\n\r\n"));
+  #warning Using FlashString in UPnP
 #else
   strcpy(body_tmp, "M-SEARCH * HTTP/1.1\r\n");
   strcat(body_tmp, "HOST: 239.255.255.250:1900\r\n");
   strcat(body_tmp, "MAN: \"ssdp:discover\"\r\n");
   strcat(body_tmp, "MX: 5\r\n");
   strcat(body_tmp, "ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1\r\n\r\n");
+  #warning Not using FlashString in UPnP
 #endif
 
-#if UPNP_USING_ETHERNET
+// KH, To check
+#if UPNP_USING_ETHERNET && !UPNP_USING_NATIVE_ETHERNET
   _udpClient.write(body_tmp, strlen(body_tmp));
 #else
   #if defined(ESP8266)
@@ -1011,7 +1015,7 @@ bool UPnP::getIGDEventURLs(gatewayInfo *deviceInfo)
 
 // KH, Somehow nRF52 and STM32 WiFi (ESP8266/ESP32-AT and WiFiNINA) don't behave well with FlashString
 // Disable for nRF52 and STM32 WiFi now.
-#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET) )
+#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET && !UPNP_USING_NATIVE_ETHERNET) )
 
   _UPnPClient.print(F("GET "));
   _UPnPClient.print(deviceInfo->path);
@@ -1069,7 +1073,9 @@ bool UPnP::getIGDEventURLs(gatewayInfo *deviceInfo)
     String line = _UPnPClient.readStringUntil('\r');
     int index_in_line = 0;
 
+    UPNP_LOGDEBUG0("\nPrint line\n");
     UPNP_LOGDEBUG0(line);
+    //UPNP_LOGDEBUG0("\nPrinted line\n");
 
     if (!urlBaseFound && line.indexOf(F("<URLBase>")) >= 0)
     {
@@ -1188,7 +1194,7 @@ bool UPnP::addPortMappingEntry(gatewayInfo *deviceInfo, upnpRule *rule_ptr)
 
 // KH, Somehow nRF52 and STM32 WiFi (ESP8266/ESP32-AT and WiFiNINA) don't behave well with FlashString
 // Disable for nRF52 and STM32 WiFi now.
-#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET) )
+#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET && !UPNP_USING_NATIVE_ETHERNET) )
 
   strcpy_P(body_tmp, PSTR("<?xml version=\"1.0\"?><s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"><s:Body><u:AddPortMapping xmlns:u=\""));
   strcat_P(body_tmp, deviceInfo->serviceTypeName.c_str());
@@ -1390,7 +1396,7 @@ bool UPnP::printAllPortMappings()
     
 // KH, Somehow nRF52 and STM32 WiFi (ESP8266/ESP32-AT and WiFiNINA) don't behave well with FlashString
 // Disable for nRF52 and STM32 WiFi now.
-#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET) )    
+#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET && !UPNP_USING_NATIVE_ETHERNET) )    
 
     strcpy_P(body_tmp, PSTR("<?xml version=\"1.0\"?>"
                             "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">"

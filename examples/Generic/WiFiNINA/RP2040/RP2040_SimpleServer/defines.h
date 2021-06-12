@@ -1,7 +1,7 @@
 /****************************************************************************************************************************
   defines.h
   
-  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1
+  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1, RP2040-based
   with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266-AT, W5x00 Ethernet shields
   
   DDNS_Generic is a library to automatically add port mappings to router using UPnP SSDP
@@ -44,62 +44,42 @@
   #include "WiFiEspAT.h"
 #endif
 
-#if ( defined(STM32F0) || defined(STM32F1) || defined(STM32F2) || defined(STM32F3)  ||defined(STM32F4) || defined(STM32F7) || \
-       defined(STM32L0) || defined(STM32L1) || defined(STM32L4) || defined(STM32H7)  ||defined(STM32G0) || defined(STM32G4) || \
-       defined(STM32WB) || defined(STM32MP1) )
-  #if defined(WIFI_USE_STM32)
-  #undef WIFI_USE_STM32
+
+#if ( defined(ARDUINO_NANO_RP2040_CONNECT) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_RASPBERRY_PI_PICO) || \
+      defined(ARDUINO_GENERIC_RP2040) || defined(ARDUINO_ADAFRUIT_FEATHER_RP2040) )
+  #if defined(WIFI_USE_RP2040)
+    #undef WIFI_USE_RP2040
   #endif
-  #define WIFI_USE_STM32      true
+  #define WIFI_USE_RP2040          true
 #else
-  #error This code is intended to run on the STM32 platform! Please check your Tools->Board setting.  
+  #error This code is intended to run on the RP2040 platform! Please check your Tools->Board setting.  
 #endif
 
-#if defined(STM32F0)
-  #warning STM32F0 board selected
-  #define BOARD_TYPE  "STM32F0"
-#elif defined(STM32F1)
-  #warning STM32F1 board selected
-  #define BOARD_TYPE  "STM32F1"
-#elif defined(STM32F2)
-  #warning STM32F2 board selected
-  #define BOARD_TYPE  "STM32F2"
-#elif defined(STM32F3)
-  #warning STM32F3 board selected
-  #define BOARD_TYPE  "STM32F3"
-#elif defined(STM32F4)
-  #warning STM32F4 board selected
-  #define BOARD_TYPE  "STM32F4"
-#elif defined(STM32F7)
-  #warning STM32F7 board selected
-  #define BOARD_TYPE  "STM32F7"
-#elif defined(STM32L0)
-  #warning STM32L0 board selected
-  #define BOARD_TYPE  "STM32L0"
-#elif defined(STM32L1)
-  #warning STM32L1 board selected
-  #define BOARD_TYPE  "STM32L1"
-#elif defined(STM32L4)
-  #warning STM32L4 board selected
-  #define BOARD_TYPE  "STM32L4"
-#elif defined(STM32H7)
-  #warning STM32H7 board selected
-  #define BOARD_TYPE  "STM32H7"
-#elif defined(STM32G0)
-  #warning STM32G0 board selected
-  #define BOARD_TYPE  "STM32G0"
-#elif defined(STM32G4)
-  #warning STM32G4 board selected
-  #define BOARD_TYPE  "STM32G4"
-#elif defined(STM32WB)
-  #warning STM32WB board selected
-  #define BOARD_TYPE  "STM32WB"
-#elif defined(STM32MP1)
-  #warning STM32MP1 board selected
-  #define BOARD_TYPE  "STM32MP1"
-#else
-  #warning STM32 unknown board selected
-  #define BOARD_TYPE  "STM32 Unknown"
+#if defined(WIFI_USE_RP2040) && defined(ARDUINO_ARCH_MBED)
+
+  #warning Using ARDUINO_ARCH_MBED
+  
+  #if ( defined(ARDUINO_NANO_RP2040_CONNECT)    || defined(ARDUINO_RASPBERRY_PI_PICO) || \
+        defined(ARDUINO_GENERIC_RP2040) || defined(ARDUINO_ADAFRUIT_FEATHER_RP2040) )
+    // Only undef known BOARD_NAME to use better one
+    #undef BOARD_NAME
+  #endif
+  
+  #if defined(ARDUINO_RASPBERRY_PI_PICO)
+    #define BOARD_NAME      "MBED RASPBERRY_PI_PICO"
+  #elif defined(ARDUINO_ADAFRUIT_FEATHER_RP2040)
+    #define BOARD_NAME      "MBED ADAFRUIT_FEATHER_RP2040"
+  #elif defined(ARDUINO_GENERIC_RP2040)
+    #define BOARD_NAME      "MBED GENERIC_RP2040"
+  #elif defined(ARDUINO_NANO_RP2040_CONNECT) 
+    #define BOARD_NAME      "MBED NANO_RP2040_CONNECT"
+  #else
+    // Use default BOARD_NAME if exists
+    #if !defined(BOARD_NAME)
+      #define BOARD_NAME      "MBED Unknown RP2040"
+    #endif
+  #endif
+
 #endif
 
 #ifndef BOARD_NAME
@@ -117,7 +97,8 @@
 #include <WiFiWebServer.h>
 #include <DDNS_Generic.h>
 
-char ssid[] = "****";        // your network SSID (name)
-char pass[] = "****";        // your network password
-
+char ssid[] = "HueNet1";        // your network SSID (name)
+char pass[] = "jenniqqs";        // your network password
+//char ssid[] = "****";        // your network SSID (name)
+//char pass[] = "****";        // your network password
 #endif    //defines_h

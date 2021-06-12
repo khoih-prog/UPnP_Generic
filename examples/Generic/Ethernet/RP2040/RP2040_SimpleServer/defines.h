@@ -24,58 +24,57 @@
 #define DDNS_USING_ETHERNET         true
 
 /////////////////////////////////
-  
-#if !( defined(NRF52840_FEATHER) || defined(NRF52832_FEATHER) || defined(NRF52_SERIES) || defined(ARDUINO_NRF52_ADAFRUIT) || \
-        defined(NRF52840_FEATHER_SENSE) || defined(NRF52840_ITSYBITSY) || defined(NRF52840_CIRCUITPLAY) || defined(NRF52840_CLUE) || \
-        defined(NRF52840_METRO) || defined(NRF52840_PCA10056) || defined(PARTICLE_XENON) || defined(NINA_B302_ublox) || defined(NINA_B112_ublox) )
 
-  #error This code is intended to run on the nRF52 platform! Please check your Tools->Board setting.
-#endif
-
-/////////////////////////////////
-
-#if defined(ETHERNET_USE_NRF528XX)
-  #undef ETHERNET_USE_NRF528XX
-#endif
-
-#define ETHERNET_USE_NRF528XX          true
-#warning Use NRF52 architecture with Ethernet   
-
-// Default pin 10 to SS/CS
-#define USE_THIS_SS_PIN       10
-
-/////////////////////////////////
-  
-#if defined(NRF52840_FEATHER)
-  #define BOARD_TYPE      "NRF52840_FEATHER_EXPRESS"
-#elif defined(NRF52832_FEATHER)
-  #define BOARD_TYPE      "NRF52832_FEATHER"
-#elif defined(NRF52840_FEATHER_SENSE)
-  #define BOARD_TYPE      "NRF52840_FEATHER_SENSE"
-#elif defined(NRF52840_ITSYBITSY)
-  #define BOARD_TYPE      "NRF52840_ITSYBITSY_EXPRESS"
-#elif defined(NRF52840_CIRCUITPLAY)
-  #define BOARD_TYPE      "NRF52840_CIRCUIT_PLAYGROUND"
-#elif defined(NRF52840_CLUE)
-  #define BOARD_TYPE      "NRF52840_CLUE"
-#elif defined(NRF52840_METRO)
-  #define BOARD_TYPE      "NRF52840_METRO_EXPRESS"
-#elif defined(NRF52840_PCA10056)
-  #define BOARD_TYPE      "NORDIC_NRF52840DK"
-#elif defined(NINA_B302_ublox)
-  #define BOARD_TYPE      "NINA_B302_ublox"
-#elif defined(NINA_B112_ublox)
-  #define BOARD_TYPE      "NINA_B112_ublox"
-#elif defined(PARTICLE_XENON)
-  #define BOARD_TYPE      "PARTICLE_XENON"
-#elif defined(MDBT50Q_RX)
-  #define BOARD_TYPE      "RAYTAC_MDBT50Q_RX"
-#elif defined(ARDUINO_NRF52_ADAFRUIT)
-  #define BOARD_TYPE      "ARDUINO_NRF52_ADAFRUIT"
+#if ( defined(ARDUINO_NANO_RP2040_CONNECT) || defined(ARDUINO_ARCH_RP2040) || defined(ARDUINO_RASPBERRY_PI_PICO) || \
+      defined(ARDUINO_GENERIC_RP2040) || defined(ARDUINO_ADAFRUIT_FEATHER_RP2040) )
+  #if defined(ETHERNET_USE_RP2040)
+    #undef ETHERNET_USE_RP2040
+  #endif
+  #define ETHERNET_USE_RP2040          true
+  #warning Use RP2040 architecture with Ethernet  
 #else
-  #define BOARD_TYPE      "nRF52 Unknown"
+  #error This code is intended to run on the RP2040 platform! Please check your Tools->Board setting.  
 #endif
+  
 
+/////////////////////////////////
+
+#if ETHERNET_USE_RP2040
+  
+  // Default pin 5 (in Mbed) or 17 to SS/CS
+  #if defined(ARDUINO_ARCH_MBED)
+    // For RPI Pico using Arduino Mbed RP2040 core
+    // SCK: GPIO2,  MOSI: GPIO3, MISO: GPIO4, SS/CS: GPIO5
+    
+    #define USE_THIS_SS_PIN       5
+
+    #if defined(BOARD_NAME)
+      #undef BOARD_NAME
+    #endif
+
+    #if defined(ARDUINO_RASPBERRY_PI_PICO) 
+      #define BOARD_TYPE      "MBED RASPBERRY_PI_PICO"
+    #elif defined(ARDUINO_ADAFRUIT_FEATHER_RP2040)
+      #define BOARD_TYPE      "MBED DAFRUIT_FEATHER_RP2040"
+    #elif defined(ARDUINO_GENERIC_RP2040)
+      #define BOARD_TYPE      "MBED GENERIC_RP2040"
+    #else
+      #define BOARD_TYPE      "MBED Unknown RP2040"
+    #endif
+    
+  #else
+    // For RPI Pico using E. Philhower RP2040 core
+    // SCK: GPIO18,  MOSI: GPIO19, MISO: GPIO16, SS/CS: GPIO17
+    #define USE_THIS_SS_PIN       17
+
+  #endif
+    
+  #define SS_PIN_DEFAULT        USE_THIS_SS_PIN
+
+  // For RPI Pico
+  #warning Use RPI-Pico RP2040 architecture  
+
+#endif
 
 ///////////////////////////////////////////
 // Select Ethernet Library for the Shield

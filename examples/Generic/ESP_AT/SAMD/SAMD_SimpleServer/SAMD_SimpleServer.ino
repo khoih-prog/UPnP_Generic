@@ -1,8 +1,8 @@
 /****************************************************************************************************************************
   SAMD_SimpleServer.ino
   
-  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1
-  with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266-AT, W5x00 Ethernet shields
+  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1,Teensy
+  with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266/ESP32-AT, W5x00, ENC28J60, Native Ethernet shields
   
   DDNS_Generic is a library to automatically add port mappings to router using UPnP SSDP
   (Simple Service Discovery Protocol) in order to provide access to the local Web Services from the Internet.
@@ -10,12 +10,13 @@
   Based on and modified from Ofek Pearl's TinyUPnP Library (https://github.com/ofekp/TinyUPnP)
   Built by Khoi Hoang https://github.com/khoih-prog/UPnP_Generic
   Licensed under MIT license
-  Version: 3.1.5
+  Version: 3.2.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   3.1.4  K Hoang      23/09/2020 Initial coding for Generic boards using many WiFi/Ethernet modules/shields.
   3.1.5  K Hoang      28/09/2020 Fix issue with nRF52 and STM32F/L/H/G/WB/MP1 using ESP8266/ESP32-AT
+  3.2.0  K Hoang      11/06/2021 Add support to RP2040-based boards using ESP-AT, WiFiNINA, W5x00 / ENC28J60
  *****************************************************************************************************************************/
 /*
   Note: This example uses the DDNS_Generic library (https://github.com/khoih-prog/DDNS_Generic)
@@ -43,7 +44,9 @@ int status    = WL_IDLE_STATUS;     // the Wifi radio's status
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
-  Serial.print(F("DDNSGeneric - IP Change Detected: "));
+  Serial.print(F("DDNSGeneric - IP Change Detected: oldIP = "));
+  Serial.print(oldIP);
+  Serial.print(F(", newIP = "));
   Serial.println(newIP);
 }
 
@@ -58,8 +61,10 @@ void handleRoot()
   int hr = min / 60;
   int day = hr / 24;
 
-  snprintf_P(temp, BUFFER_SIZE - 1,
-           PSTR("<html>\
+  hr = hr % 24;
+
+  snprintf(temp, BUFFER_SIZE - 1,
+           "<html>\
 <head>\
 <meta http-equiv='refresh' content='5'/>\
 <title>%s</title>\
@@ -73,7 +78,7 @@ body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Col
 <h3>on %s</h3>\
 <p>Uptime: %d d %02d:%02d:%02d</p>\
 </body>\
-</html>"), BOARD_NAME, BOARD_NAME, SHIELD_TYPE, day, hr, min % 60, sec % 60);
+</html>", BOARD_NAME, BOARD_NAME, SHIELD_TYPE, day, hr, min % 60, sec % 60);
 
   server.send(200, F("text/html"), temp);
   digitalWrite(led, 0);
@@ -109,15 +114,21 @@ void setup(void)
   Serial.begin(115200);
   while (!Serial);
 
-  Serial.print("\nStart SAMD_SimpleServer on " + String(BOARD_NAME));
-  Serial.println(" with " + String(SHIELD_TYPE));
+  Serial.print("\nStart SAMD_SimpleServer on "); Serial.print(BOARD_NAME);
+  Serial.print(" using "); Serial.println(SHIELD_TYPE);
+  Serial.println(UPNP_GENERIC_VERSION);
 
   // initialize serial for ESP module
   EspSerial.begin(115200);
   // initialize ESP module
   WiFi.init(&EspSerial);
 
-  Serial.println(F("WiFi shield init done"));
+#if defined(ESP8266_AT_WEBSERVER_VERSION)
+  Serial.print(F("WiFi shield init done. ESP8266_AT_WebServer Version v"));
+  Serial.println(ESP8266_AT_WEBSERVER_VERSION);
+#else
+  Serial.println(F("WiFi shield init done."));
+#endif
 
   // check for the presence of the shield
   if (WiFi.status() == WL_NO_SHIELD)
@@ -223,7 +234,11 @@ void loop(void)
 {
   DDNSGeneric.update(555000);
 
-  uPnP->updatePortMappings(600000);  // 10 minutes
+  // In operation, update 5 minutes before LEASE expires
+  //uPnP->updatePortMappings( (LEASE_DURATION - 300)  * 1000L);
+
+  // For testing
+  uPnP->updatePortMappings(180000);
 
   server.handleClient();
 }
