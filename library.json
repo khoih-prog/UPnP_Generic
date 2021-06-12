@@ -1,8 +1,8 @@
 {
   "name": "UPnP_Generic",
   "version": "3.2.0",
-  "description": "Automatically add port mappings to router using UPnP SSDP for Arduino boards, running on nRF52, SAMD21/SAMD51, STM32F/L/H/G/WB/MP1, Teensy, etc. besides ESP8266/ESP32, using ESP WiFi, WiFiNINA, Ethernet W5x00, ESP8266/ESP32 AT-command WiFi",
-  "keywords": "uPnP, SSDP, router, port-mappings, port-forwarding, update, wifi, ethernet, client, server, communication",
+  "description": "Automatically add port mappings to router using UPnP SSDP for Arduino boards, running on nRF52, SAMD21/SAMD51, STM32F/L/H/G/WB/MP1, Teensy, RP2040-based boards, etc. besides ESP8266/ESP32, using ESP WiFi, WiFiNINA, Ethernet W5x00, ESP8266/ESP32 AT-command WiFi",
+  "keywords": "uPnP, SSDP, router, port-mappings, port-forwarding, mbed, wifi, ethernet, wifinina, w5x00, communication, esp32, esp8266, samd, nrf52, stm32, nano-rp2040-connect, rp2040, rpi-pico, nano-33-iot",
   "authors": 
   [
     {
