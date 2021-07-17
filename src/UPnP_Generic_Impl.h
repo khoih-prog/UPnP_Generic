@@ -1,7 +1,7 @@
 /****************************************************************************************************************************
   UPnP_Generic_Impl.h
   
-  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1,Teensy
+  For all Generic boards such as ESP8266, ESP32, WT32_ETH01, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1,Teensy
   with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266/ESP32-AT, W5x00, ENC28J60, Native Ethernet shields
   
   DDNS_Generic is a library to automatically add port mappings to router using UPnP SSDP
@@ -10,13 +10,14 @@
   Based on and modified from Ofek Pearl's TinyUPnP Library (https://github.com/ofekp/TinyUPnP)
   Built by Khoi Hoang https://github.com/khoih-prog/UPnP_Generic
   Licensed under GPL-3.0 license
-  Version: 3.2.0
+  Version: 3.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   3.1.4  K Hoang      23/09/2020 Initial coding for Generic boards using many WiFi/Ethernet modules/shields.
   3.1.5  K Hoang      28/09/2020 Fix issue with nRF52 and STM32F/L/H/G/WB/MP1 using ESP8266/ESP32-AT
   3.2.0  K Hoang      11/06/2021 Add support to RP2040-based boards using ESP-AT, WiFiNINA, W5x00 / ENC28J60
+  3.3.0  K Hoang      16/07/2021 Add support to WT32_ETH01 (ESP32 + LAN8720)
  *****************************************************************************************************************************/
 
 #ifndef UPnP_Generic_Impl_h
@@ -79,6 +80,8 @@ void UPnP::addPortMappingConfig(IPAddress ruleIP, int rulePort, String ruleProto
 
 #if UPNP_USING_ETHERNET
   newUpnpRule->internalAddr = (ruleIP == Ethernet.localIP()) ? ipNull : ruleIP;  // for automatic IP change handling
+#elif UPNP_USING_WT32_ETH01
+  newUpnpRule->internalAddr = (ruleIP == ETH.localIP()) ? ipNull : ruleIP;  // for automatic IP change handling 
 #else
   newUpnpRule->internalAddr = (ruleIP == WiFi.localIP()) ? ipNull : ruleIP;  // for automatic IP change handling
 #endif
@@ -134,6 +137,14 @@ portMappingResult UPnP::commitPortMappings()
 
     return NETWORK_ERROR;
   }
+#elif UPNP_USING_WT32_ETH01
+  // verify ETH is connected
+  if (!testConnectivity(startTime))
+  {
+    UPNP_LOGINFO(F("ERROR: not connected to Ethernet Network, can't continue"));
+
+    return NETWORK_ERROR;
+  } 
 #else
   // verify WiFi is connected
   if (!testConnectivity(startTime))
@@ -268,6 +279,8 @@ bool UPnP::getGatewayInfo(gatewayInfo *deviceInfo, long startTime)
 
 #if UPNP_USING_ETHERNET
   IPAddress gatewayIP = Ethernet.gatewayIP();
+#elif UPNP_USING_WT32_ETH01
+  IPAddress gatewayIP = ETH.gatewayIP();
 #else
   IPAddress gatewayIP = WiFi.gatewayIP();
 #endif
@@ -424,6 +437,31 @@ bool UPnP::testConnectivity(unsigned long startTime)
 
 #if UPNP_USING_ETHERNET
 
+  // Doing something here
+
+#elif UPNP_USING_WT32_ETH01
+
+  extern bool WT32_ETH01_eth_connected;
+
+  UPNP_LOGINFO1(F("Testing WT32_ETH01 Ethernet connection for IP :"), ETH.localIP());
+
+  while (!WT32_ETH01_eth_connected)
+  {
+    if (_timeoutMs > 0 && startTime > 0 && (millis() - startTime > _timeoutMs))
+    {
+      UPNP_LOGINFO(F(" ==> Timeout verify WT32_ETH01 Ethernet connection"));
+
+      _UPnPClient.stop();
+      return false;
+    }
+
+    delay(200);
+
+    UPNP_LOGINFO0(".");
+  }
+
+  UPNP_LOGINFO0(" ==> GOOD\n");
+
 #else
 
   UPNP_LOGINFO1(F("Testing WiFi connection for IP :"), WiFi.localIP());
@@ -504,17 +542,24 @@ bool UPnP::verifyPortMapping(gatewayInfo *deviceInfo, upnpRule *rule_ptr)
     if (line.indexOf(F("NewInternalClient")) >= 0)
     {
       String content = getTagContent(line, F("NewInternalClient"));
-
+      
+      UPNP_LOGDEBUG1(F("verifyPortMapping: content ="), content);
+      UPNP_LOGDEBUG1(F("verifyPortMapping: NewInternalClient in line ="), line);
+      
       if (content.length() > 0)
       {
 
 #if UPNP_USING_ETHERNET
         IPAddress ipAddressToVerify = (rule_ptr->internalAddr == ipNull) ? Ethernet.localIP() : rule_ptr->internalAddr;
+#elif UPNP_USING_WT32_ETH01
+        IPAddress ipAddressToVerify = (rule_ptr->internalAddr == ipNull) ? ETH.localIP() : rule_ptr->internalAddr;
 #else
         IPAddress ipAddressToVerify = (rule_ptr->internalAddr == ipNull) ? WiFi.localIP() : rule_ptr->internalAddr;
 #endif
 
-
+        UPNP_LOGDEBUG1(F("ipAddressToVerify ="), ipAddressToVerify);
+        
+        
         // KH, to verify
 #if (ESP32 || ESP8266)
         if (content == ipAddressToVerify.toString())
@@ -529,6 +574,10 @@ bool UPnP::verifyPortMapping(gatewayInfo *deviceInfo, upnpRule *rule_ptr)
           detectedChangedIP = true;
         }
       }
+    }
+    else
+    {
+      UPNP_LOGDEBUG1(F("verifyPortMapping: no NewInternalClient in line ="), line);
     }
   }
 
@@ -621,7 +670,7 @@ bool UPnP::applyActionOnSpecificPortMapping(SOAPAction *soapAction, gatewayInfo 
 
 // KH, Somehow nRF52 and STM32 WiFi (ESP8266/ESP32-AT and WiFiNINA) don't behave well with FlashString
 // Disable for nRF52 and STM32 WiFi now.
-#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET && !UPNP_USING_NATIVE_ETHERNET) )
+#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET && !UPNP_USING_NATIVE_ETHERNET) || UPNP_USING_WT32_ETH01 )
 
   strcpy_P(body_tmp, PSTR("<?xml version=\"1.0\"?>\r\n<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\">\r\n<s:Body>\r\n<u:"));
   strcat_P(body_tmp, soapAction->name);
@@ -770,7 +819,12 @@ bool UPnP::connectUDP()
       return true;
     }
   #endif
-
+  
+#elif UPNP_USING_WT32_ETH01
+  if (_udpClient.beginMulticast(ipMulti, UPNP_SSDP_PORT))
+  {
+    return true;
+  }
 #else
 
   #if defined(ESP8266)
@@ -1194,7 +1248,7 @@ bool UPnP::addPortMappingEntry(gatewayInfo *deviceInfo, upnpRule *rule_ptr)
 
 // KH, Somehow nRF52 and STM32 WiFi (ESP8266/ESP32-AT and WiFiNINA) don't behave well with FlashString
 // Disable for nRF52 and STM32 WiFi now.
-#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET && !UPNP_USING_NATIVE_ETHERNET) )
+#if ( (ESP8266 || ESP32) || (UPNP_USING_ETHERNET && !UPNP_USING_NATIVE_ETHERNET) || UPNP_USING_WT32_ETH01 )
 
   strcpy_P(body_tmp, PSTR("<?xml version=\"1.0\"?><s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"><s:Body><u:AddPortMapping xmlns:u=\""));
   strcat_P(body_tmp, deviceInfo->serviceTypeName.c_str());
@@ -1210,6 +1264,8 @@ bool UPnP::addPortMappingEntry(gatewayInfo *deviceInfo, upnpRule *rule_ptr)
 
 #if UPNP_USING_ETHERNET
   IPAddress ipAddress = (rule_ptr->internalAddr == ipNull) ? Ethernet.localIP() : rule_ptr->internalAddr;
+#elif UPNP_USING_WT32_ETH01
+  IPAddress ipAddress = (rule_ptr->internalAddr == ipNull) ? ETH.localIP() : rule_ptr->internalAddr;
 #else
   IPAddress ipAddress = (rule_ptr->internalAddr == ipNull) ? WiFi.localIP() : rule_ptr->internalAddr;
 #endif
@@ -1392,7 +1448,7 @@ bool UPnP::printAllPortMappings()
       }
     }
 
-    UPNP_LOGINFO1(F("Sending query for index :"), index);
+    UPNP_LOGDEBUG1(F("Sending query for index :"), index);
     
 // KH, Somehow nRF52 and STM32 WiFi (ESP8266/ESP32-AT and WiFiNINA) don't behave well with FlashString
 // Disable for nRF52 and STM32 WiFi now.
@@ -1424,10 +1480,10 @@ bool UPnP::printAllPortMappings()
     // KH, to verify
 #if (ESP32 || ESP8266)
     _UPnPClient.println("Host: " + _gwInfo.host.toString() + ":" + String(_gwInfo.actionPort));
-    UPNP_LOGINFO("Host: " + _gwInfo.host.toString() + ":" + String(_gwInfo.actionPort));
+    UPNP_LOGDEBUG3(F("Host: "), _gwInfo.host, F(":"), _gwInfo.actionPort);
 #else
     _UPnPClient.println("Host: " + String(_gwInfo.host) + ":" + String(_gwInfo.actionPort));
-    UPNP_LOGINFO("Host: " + IPAddresstoString(_gwInfo.host) + ":" + String(_gwInfo.actionPort));
+    UPNP_LOGDEBUG3(F("Host: "), _gwInfo.host, F(":"), _gwInfo.actionPort);
 #endif
 
     _UPnPClient.print(F("SOAPAction: \""));
@@ -1607,6 +1663,8 @@ void UPnP::upnpRuleToString(upnpRule *rule_ptr)
 
 #if UPNP_USING_ETHERNET
   IPAddress ipAddress = (rule_ptr->internalAddr == ipNull) ? Ethernet.localIP() : rule_ptr->internalAddr;
+#elif UPNP_USING_WT32_ETH01
+  IPAddress ipAddress = (rule_ptr->internalAddr == ipNull) ? ETH.localIP() : rule_ptr->internalAddr;
 #else
   IPAddress ipAddress = (rule_ptr->internalAddr == ipNull) ? WiFi.localIP() : rule_ptr->internalAddr;
 #endif

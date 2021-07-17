@@ -1,5 +1,5 @@
 /****************************************************************************************************************************
-  nRF52_PWM_LEDServer.ino
+  PWM_LEDServer_WT32_ETH01.ino
   
   For all Generic boards such as ESP8266, ESP32, WT32_ETH01, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1,Teensy
   with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266/ESP32-AT, W5x00, ENC28J60, Native Ethernet shields
@@ -21,47 +21,64 @@
  *****************************************************************************************************************************/
 /*
   Note: This example uses the DDNS_Generic library (https://github.com/khoih-prog/DDNS_Generic)
-        You can access this WebServer by either localIP:LISTEN_PORT such as 192.169.2.100:6053/?percentage=20
-        or DDNS_Host:LISTEN_PORT, such as account.duckdns.org:6053/?percentage=20
+        You can access this WebServer by either localIP:LISTEN_PORT such as 192.169.2.100:5933/?percentage=20
+        or DDNS_Host:LISTEN_PORT, such as account.duckdns.org:5933/?percentage=20
 */
 
-#include "defines.h"
+#if defined(ESP32)
+  #define UPNP_USING_WT32_ETH01       true
+#else
+  #error This code is intended to run on the ESP32 platform! Please check your Tools->Board setting. 
+#endif
 
-#define UPNP_USING_ETHERNET     false
-#define UPNP_USING_WIFI         true
+// Debug Level from 0 to 4
+#define _DDNS_GENERIC_LOGLEVEL_     1
+#define _UPNP_LOGLEVEL_             3
 
-#include <UPnP_Generic.h>
+// Select DDNS_USING_WIFI for boards using built-in WiFi, such as Nano-33-IoT
+#define DDNS_USING_WIFI             true
+#define DDNS_USING_ETHERNET         false
 
-#define LISTEN_PORT         6053
-#define LEASE_DURATION      36000  // seconds
-#define FRIENDLY_NAME       "NRF52-LED-WIFININA"  // this name will appear in your router port forwarding section
+#include <WebServer_WT32_ETH01.h>  
+
+#include <UPnP_Generic.h>           // https://github.com/khoih-prog/UPnP_Generic
+
+#include <DDNS_Generic.h>           // https://github.com/khoih-prog/DDNS_Generic
+
+#define LISTEN_PORT         5931
+#define LEASE_DURATION      36000                   // seconds
+
+// Select the IP address according to your local network
+IPAddress myIP(192, 168, 2, 232);
+IPAddress myGW(192, 168, 2, 1);
+IPAddress mySN(255, 255, 255, 0);
+
+// Google DNS Server IP
+IPAddress myDNS(8, 8, 8, 8);
+
+#define FRIENDLY_NAME       ARDUINO_BOARD "-WT32_ETH01"   // this name will appear in your router port forwarding section
 
 UPnP* uPnP;
 
-WiFiWebServer server(LISTEN_PORT);
+WebServer server(LISTEN_PORT);
 
-int status    = WL_IDLE_STATUS;     // the Wifi radio's status
+// setting PWM properties
+const int freq        = 5000;
+const int ledChannel  = 0;
+const int resolution  = 10; //Resolution 8, 10, 12, 15 bits. Select 10 => 1024 steps
 
 #define LED_REVERSED      false
+#define LED_ON            100
+#define LED_OFF           0
 
-#if LED_REVERSED
-  #define LED_ON          0
-  #define LED_OFF         100
-#else
-  #define LED_ON          100
-  #define LED_OFF         0
-#endif
-
-#if defined(LED_BLUE)
-  #define LED_PIN           LED_BLUE        //  BLUE_LED on nRF52840 Feather Express, Itsy-Bitsy
-#else
-  #define LED_PIN           3               //  RED LED
-#endif
+#define LED_PIN           2     // LED_BUILTIN
 
 const int delayval = 10;
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
+  (void) oldIP;
+  
   Serial.print(F("DDNSGeneric - IP Change Detected: "));
   Serial.println(newIP);
 }
@@ -69,14 +86,14 @@ void onUpdateCallback(const char* oldIP, const char* newIP)
 // 0 <= percentage <= 100
 void setPower(uint32_t percentage)
 {
-  long pwm_val = map(percentage, 0, 100, 0, 1023);
+  long pwm_val = map(percentage, LED_OFF, LED_ON, 0, 1023);
 
   if (pwm_val > 1023)
   {
     pwm_val = 1023;
   }
 
-  analogWrite(LED_PIN, pwm_val);
+  ledcWrite(ledChannel, pwm_val);
 }
 
 void fadeOn(void)
@@ -118,10 +135,9 @@ void handleRoot()
 {
   String message = F("Hello from ");
 
-  message += String(BOARD_NAME);
+  message += String(ARDUINO_BOARD);
   message += F(" running UPnP_Generic & DDNS_Generic\n");
-  message += F("on ");
-  message += String(SHIELD_TYPE);
+  
   message += F("\nNumber of args received: ");
   message += server.args();  // get number of parameters
   message += F("\n");
@@ -170,55 +186,50 @@ void setup(void)
   Serial.begin(115200);
   while (!Serial);
 
-  Serial.print("\nStart nRF52_PWM_LEDServer on "); Serial.print(BOARD_NAME);
-  Serial.print(" using "); Serial.println(SHIELD_TYPE);
+#if ( ARDUINO_ESP32S2_DEV || ARDUINO_FEATHERS2 || ARDUINO_ESP32S2_THING_PLUS || ARDUINO_MICROS2 || \
+        ARDUINO_METRO_ESP32S2 || ARDUINO_MAGTAG29_ESP32S2 || ARDUINO_FUNHOUSE_ESP32S2 || \
+        ARDUINO_ADAFRUIT_FEATHER_ESP32S2_NOPSRAM )
+  #warning Using ESP32_S2
+  
+  delay(2000);
+#endif
+
+  Serial.print(F("\nStart PWM_LEDServer_WT32_ETH01 on ")); Serial.print(BOARD_NAME);
+  Serial.print(F(" with ")); Serial.println(SHIELD_TYPE);
+  Serial.println(WEBSERVER_WT32_ETH01_VERSION);
+  Serial.println(DDNS_GENERIC_VERSION);
   Serial.println(UPNP_GENERIC_VERSION);
 
   pinMode(LED_PIN,OUTPUT);
+  
+  // configure LED PWM function
+  ledcSetup(ledChannel, freq, resolution);
+  
+  // attach the channel to the LED_PIN
+  ledcAttachPin(LED_PIN, ledChannel);
 
   showLED();
 
-  // check for the presence of the shield
-#if USE_WIFI_NINA
-  if (WiFi.status() == WL_NO_MODULE)
-#else
-  if (WiFi.status() == WL_NO_SHIELD)
-#endif
-  {
-    Serial.println(F("WiFi shield not present"));
-    // don't continue
-    while (true);
-  }
+  //bool begin(uint8_t phy_addr=ETH_PHY_ADDR, int power=ETH_PHY_POWER, int mdc=ETH_PHY_MDC, int mdio=ETH_PHY_MDIO, 
+  //           eth_phy_type_t type=ETH_PHY_TYPE, eth_clock_mode_t clk_mode=ETH_CLK_MODE);
+  //ETH.begin(ETH_PHY_ADDR, ETH_PHY_POWER, ETH_PHY_MDC, ETH_PHY_MDIO, ETH_PHY_TYPE, ETH_CLK_MODE);
+  ETH.begin(ETH_PHY_ADDR, ETH_PHY_POWER);
 
-#if USE_WIFI_NINA
-  String fv = WiFi.firmwareVersion();
-  if (fv < WIFI_FIRMWARE_LATEST_VERSION)
-  {
-    Serial.println(F("Please upgrade the firmware"));
-  }
-#endif
+  // Static IP, leave without this line to get IP via DHCP
+  //bool config(IPAddress local_ip, IPAddress gateway, IPAddress subnet, IPAddress dns1 = 0, IPAddress dns2 = 0);
+  ETH.config(myIP, myGW, mySN, myDNS);
 
-  Serial.print(F("Connecting to "));
-  Serial.println(ssid);
+  WT32_ETH01_onEvent();
+
+  WT32_ETH01_waitForConnect();
   
-  WiFi.begin(ssid, pass);
-
-  // Wait for connection
-  while (WiFi.status() != WL_CONNECTED) 
-  {
-    delay(500);
-    Serial.print(F("."));
-  }
-  
-  Serial.println();
-
-  IPAddress localIP = WiFi.localIP();
-  
+  IPAddress localIP = ETH.localIP();
+ 
   Serial.print(F("IP address: "));
   Serial.println(localIP);
 
   ////////////////
-  
+
   DDNSGeneric.service("duckdns");    // Enter your DDNS Service Name - "duckdns" / "noip"
 
   /*
@@ -231,8 +242,6 @@ void setup(void)
   DDNSGeneric.client("account.duckdns.org", "12345678-1234-1234-1234-123456789012");
 
   DDNSGeneric.onUpdate(onUpdateCallback);
-
-  ////////////////
 
   ////////////////
 
@@ -287,13 +296,20 @@ void setup(void)
   
   Serial.print(F("HTTP WiFiWebServer is @ IP : "));
   Serial.print(localIP); 
-  Serial.print(", port = ");
+  Serial.print(F(", port = "));
   Serial.println(LISTEN_PORT);
+
+  Serial.print(F("Gateway Address: "));
+  Serial.println(ETH.gatewayIP());
+  Serial.print(F("Network Mask: "));
+  Serial.println(ETH.subnetMask());
 }
 
 void loop(void) 
 {
-  DDNSGeneric.update(300000);
+  //delay(100);
+  
+  DDNSGeneric.update(555000);
 
   uPnP->updatePortMappings(600000);  // 10 minutes
 

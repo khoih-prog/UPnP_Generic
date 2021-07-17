@@ -1,5 +1,5 @@
 /****************************************************************************************************************************
-  STM32_SimpleServer.ino
+  SimpleServerEsp32.ino
   
   For all Generic boards such as ESP8266, ESP32, WT32_ETH01, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1,Teensy
   with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266/ESP32-AT, W5x00, ENC28J60, Native Ethernet shields
@@ -21,32 +21,54 @@
  *****************************************************************************************************************************/
 /*
   Note: This example uses the DDNS_Generic library (https://github.com/khoih-prog/DDNS_Generic)
-        You can access this WebServer by either localIP:LISTEN_PORT such as 192.169.2.100:6032
-        or DDNS_Host:LISTEN_PORT, such as account.duckdns.org:6032
+        You can access this WebServer by either localIP:LISTEN_PORT such as 192.169.2.100:5952
+        or DDNS_Host:LISTEN_PORT, such as account.duckdns.org:5932
 */
 
-#include "defines.h"
+#if defined(ESP32)
+  #define UPNP_USING_WT32_ETH01       true
+#else
+  #error This code is intended to run on the ESP32 platform! Please check your Tools->Board setting. 
+#endif
 
-#define UPNP_USING_ETHERNET     true
-#define UPNP_USING_WIFI         false
+// Debug Level from 0 to 4
+#define _DDNS_GENERIC_LOGLEVEL_     1
+#define _UPNP_LOGLEVEL_             3
 
-#include <UPnP_Generic.h>
+// Select DDNS_USING_WIFI for boards using built-in WiFi, such as Nano-33-IoT
+#define DDNS_USING_WIFI             true
+#define DDNS_USING_ETHERNET         false
 
-#define LISTEN_PORT         6032
-#define LEASE_DURATION      36000  // seconds
-#define FRIENDLY_NAME       "STM32-W5X00"  // this name will appear in your router port forwarding section
+#include <WebServer_WT32_ETH01.h>  
+
+#include <UPnP_Generic.h>           // https://github.com/khoih-prog/UPnP_Generic
+
+#include <DDNS_Generic.h>           // https://github.com/khoih-prog/DDNS_Generic
+
+#define LISTEN_PORT         5931
+#define LEASE_DURATION      36000                   // seconds
+
+// Select the IP address according to your local network
+IPAddress myIP(192, 168, 2, 232);
+IPAddress myGW(192, 168, 2, 1);
+IPAddress mySN(255, 255, 255, 0);
+
+// Google DNS Server IP
+IPAddress myDNS(8, 8, 8, 8);
+
+#define FRIENDLY_NAME       ARDUINO_BOARD "-WT32_ETH01"   // this name will appear in your router port forwarding section
 
 UPnP* uPnP;
 
-EthernetWebServer server(LISTEN_PORT);
+WebServer server(LISTEN_PORT);
 
-const int led = 13;
+const int led = 2;     // LED_BUILTIN
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
-  Serial.print(F("DDNSGeneric - IP Change Detected: oldIP = "));
-  Serial.print(oldIP);
-  Serial.print(F(", newIP = "));
+  (void) oldIP;
+  
+  Serial.print(F("DDNSGeneric - IP Change Detected: "));
   Serial.println(newIP);
 }
 
@@ -60,7 +82,7 @@ void handleRoot()
   int min = sec / 60;
   int hr = min / 60;
   int day = hr / 24;
-  
+
   hr = hr % 24;
 
   snprintf_P(temp, BUFFER_SIZE - 1,
@@ -75,10 +97,9 @@ body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Col
 <body>\
 <h1>Hello from %s</h1>\
 <h3>running UPnP_Generic & DDNS_Generic</h3>\
-<h3>on %s</h3>\
 <p>Uptime: %d d %02d:%02d:%02d</p>\
 </body>\
-</html>"), BOARD_NAME, BOARD_NAME, SHIELD_TYPE, day, hr, min % 60, sec % 60);
+</html>"), BOARD_NAME, BOARD_NAME, day, hr, min % 60, sec % 60);
 
   server.send(200, F("text/html"), temp);
   digitalWrite(led, 0);
@@ -114,50 +135,37 @@ void setup(void)
   Serial.begin(115200);
   while (!Serial);
 
-  Serial.print("\nStart STM32_SimpleServer on "); Serial.print(BOARD_NAME);
-  Serial.print(" using "); Serial.println(SHIELD_TYPE);
+#if ( ARDUINO_ESP32S2_DEV || ARDUINO_FEATHERS2 || ARDUINO_ESP32S2_THING_PLUS || ARDUINO_MICROS2 || \
+        ARDUINO_METRO_ESP32S2 || ARDUINO_MAGTAG29_ESP32S2 || ARDUINO_FUNHOUSE_ESP32S2 || \
+        ARDUINO_ADAFRUIT_FEATHER_ESP32S2_NOPSRAM )
+  #warning Using ESP32_S2
+  
+  delay(1000);
+#endif
+  
+  Serial.print(F("\nStart SimpleServer_WT32_ETH01 on ")); Serial.print(BOARD_NAME);
+  Serial.print(F(" with ")); Serial.println(SHIELD_TYPE);
+  Serial.println(WEBSERVER_WT32_ETH01_VERSION);
+  Serial.println(DDNS_GENERIC_VERSION);
   Serial.println(UPNP_GENERIC_VERSION);
-  
-  ET_LOGWARN3(F("Board :"), BOARD_NAME, F(", setCsPin:"), USE_THIS_SS_PIN);
 
-  ET_LOGWARN(F("Default SPI pinout:"));
-  ET_LOGWARN1(F("MOSI:"), MOSI);
-  ET_LOGWARN1(F("MISO:"), MISO);
-  ET_LOGWARN1(F("SCK:"),  SCK);
-  ET_LOGWARN1(F("SS:"),   SS);
-  ET_LOGWARN(F("========================="));
+  //bool begin(uint8_t phy_addr=ETH_PHY_ADDR, int power=ETH_PHY_POWER, int mdc=ETH_PHY_MDC, int mdio=ETH_PHY_MDIO, 
+  //           eth_phy_type_t type=ETH_PHY_TYPE, eth_clock_mode_t clk_mode=ETH_CLK_MODE);
+  //ETH.begin(ETH_PHY_ADDR, ETH_PHY_POWER, ETH_PHY_MDC, ETH_PHY_MDIO, ETH_PHY_TYPE, ETH_CLK_MODE);
+  ETH.begin(ETH_PHY_ADDR, ETH_PHY_POWER);
 
-  #if !(USE_BUILTIN_ETHERNET || USE_UIP_ETHERNET)
-    // For other boards, to change if necessary
-    #if ( USE_ETHERNET || USE_ETHERNET_LARGE || USE_ETHERNET2  || USE_ETHERNET_ENC )
-      // Must use library patch for Ethernet, Ethernet2, EthernetLarge libraries
-      Ethernet.init (USE_THIS_SS_PIN);
-    
-    #elif USE_ETHERNET3
-      // Use  MAX_SOCK_NUM = 4 for 4K, 2 for 8K, 1 for 16K RX/TX buffer
-      #ifndef ETHERNET3_MAX_SOCK_NUM
-        #define ETHERNET3_MAX_SOCK_NUM      4
-      #endif
-    
-      Ethernet.setCsPin (USE_THIS_SS_PIN);
-      Ethernet.init (ETHERNET3_MAX_SOCK_NUM);
-  
-    #elif USE_CUSTOM_ETHERNET
-      // You have to add initialization for your Custom Ethernet here
-      // This is just an example to setCSPin to USE_THIS_SS_PIN, and can be not correct and enough
-      //Ethernet.init(USE_THIS_SS_PIN);
-      
-    #endif  //( ( USE_ETHERNET || USE_ETHERNET_LARGE || USE_ETHERNET2  || USE_ETHERNET_ENC )
-  #endif
-  
-  // start the ethernet connection and the server:
-  // Use DHCP dynamic IP and random mac
-  uint16_t index = millis() % NUMBER_OF_MAC;
-  // Use Static IP
-  //Ethernet.begin(mac[index], ip);
-  Ethernet.begin(mac[index]);
+  // Static IP, leave without this line to get IP via DHCP
+  //bool config(IPAddress local_ip, IPAddress gateway, IPAddress subnet, IPAddress dns1 = 0, IPAddress dns2 = 0);
+  ETH.config(myIP, myGW, mySN, myDNS);
 
-  IPAddress localIP = Ethernet.localIP();
+  WT32_ETH01_onEvent();
+
+  WT32_ETH01_waitForConnect();
+  
+  IPAddress localIP = ETH.localIP();
+  
+  Serial.print(F("IP address: "));
+  Serial.println(localIP);
 
   ////////////////
   
@@ -173,6 +181,8 @@ void setup(void)
   DDNSGeneric.client("account.duckdns.org", "12345678-1234-1234-1234-123456789012");
 
   DDNSGeneric.onUpdate(onUpdateCallback);
+
+  ////////////////
 
   ////////////////
 
@@ -222,16 +232,21 @@ void setup(void)
   server.onNotFound(handleNotFound);
 
   server.begin();
-
-  Serial.print(F("HTTP EthernetWebServer is @ IP : "));
+  
+  Serial.print(F("HTTP WiFiWebServer is @ IP : "));
   Serial.print(localIP); 
   Serial.print(F(", port = "));
   Serial.println(LISTEN_PORT);
+
+  Serial.print(F("Gateway Address: "));
+  Serial.println(ETH.gatewayIP());
+  Serial.print(F("Network Mask: "));
+  Serial.println(ETH.subnetMask());
 }
 
 void loop(void) 
 {
-  DDNSGeneric.update(300000);
+  DDNSGeneric.update(555000);
 
   uPnP->updatePortMappings(600000);  // 10 minutes
 

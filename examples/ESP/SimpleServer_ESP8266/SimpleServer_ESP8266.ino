@@ -1,22 +1,23 @@
 /****************************************************************************************************************************
   SimpleServerESP8266.ino
   
-  For all Generic boards such as ESP8266, ESP32, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1
-  with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266/ESP32-AT, W5x00 Ethernet shields
+  For all Generic boards such as ESP8266, ESP32, WT32_ETH01, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1,Teensy
+  with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266/ESP32-AT, W5x00, ENC28J60, Native Ethernet shields
   
   DDNS_Generic is a library to automatically add port mappings to router using UPnP SSDP
   (Simple Service Discovery Protocol) in order to provide access to the local Web Services from the Internet.
   
   Based on and modified from Ofek Pearl's TinyUPnP Library (https://github.com/ofekp/TinyUPnP)
   Built by Khoi Hoang https://github.com/khoih-prog/UPnP_Generic
-  Licensed under MIT license
-  Version: 3.2.0
+  Licensed under GPL-3.0 license
+  Version: 3.3.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
   3.1.4  K Hoang      23/09/2020 Initial coding for Generic boards using many WiFi/Ethernet modules/shields.
   3.1.5  K Hoang      28/09/2020 Fix issue with nRF52 and STM32F/L/H/G/WB/MP1 using ESP8266/ESP32-AT
   3.2.0  K Hoang      11/06/2021 Add support to RP2040-based boards using ESP-AT, WiFiNINA, W5x00 / ENC28J60
+  3.3.0  K Hoang      16/07/2021 Add support to WT32_ETH01 (ESP32 + LAN8720)
  *****************************************************************************************************************************/
 /*
   Note: This example uses the DDNS_Generic library (https://github.com/khoih-prog/DDNS_Generic)
@@ -30,7 +31,7 @@
 
 // Debug Level from 0 to 4
 #define _DDNS_GENERIC_LOGLEVEL_     1
-#define _UPNP_LOGLEVEL_             2
+#define _UPNP_LOGLEVEL_             3
 
 // Select DDNS_USING_WIFI for boards using built-in WiFi, such as Nano-33-IoT
 #define DDNS_USING_WIFI             true
@@ -158,7 +159,8 @@ void setup(void)
     For DDNS Providers where you get username and password: ( Leave the password field empty "" if not required )
     DDNSGeneric.client("domain", "username", "password");
   */
-  DDNSGeneric.client("account.duckdns.org", "12345678-1234-1234-1234-123456789012");
+  //DDNSGeneric.client("account.duckdns.org", "12345678-1234-1234-1234-123456789012");
+  DDNSGeneric.client("khoih.duckdns.org", "59f1e2ed-ab09-4089-875a-8357e2705392");
 
   DDNSGeneric.onUpdate(onUpdateCallback);
 

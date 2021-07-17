@@ -17,6 +17,7 @@
   * [Currently supported WiFi shields/modules](#currently-supported-wifi-shieldsmodules)
   * [Currently supported Ethernet shields/modules](#currently-supported-ethernet-shieldsmodules)
 * [Changelog](#changelog)
+  * [Major Releases v3.3.0](#major-releases-v330)
   * [Major Releases v3.2.0](#major-releases-v320)
   * [Releases v3.1.5](#releases-v315)
   * [Releases v3.1.4](#releases-v314)
@@ -125,6 +126,9 @@
     * [3. STM32](#3-STM32-2)
       * [25. STM32_SimpleServer](examples/Generic/ESP_AT/STM32/STM32_SimpleServer)
       * [26. STM32_PWM_LEDServer](examples/Generic/ESP_AT/STM32/STM32_PWM_LEDServer)
+  * [E. For WT32_ETH01 boards](#a-for-wt32_eth01-boards)
+    * [ 27. SimpleServer_WT32_ETH01](examples/WT32_ETH01/SimpleServer_WT32_ETH01)
+    * [ 28. PWM_LEDServer_WT32_ETH01](examples/WT32_ETH01/PWM_LEDServer_WT32_ETH01)
 * [Example nRF52_SimpleServer](#example-nrf52_simpleserver)
   * [1. File nRF52_SimpleServer.ino](#1-file-nrf52_simpleserverino)
   * [2. File defines.h](#2-file-definesh) 
@@ -140,6 +144,7 @@
   * [ 9. RP2040_SimpleServer on MBED RASPBERRY_PI_PICO with W5x00 using Ethernet2 Library](#9-rp2040_simpleserver-on-mbed-raspberry_pi_pico-with-w5x00-using-ethernet2-library)
   * [10. PWM_LEDServer_ESP32 on ESP32S2_DEV](#10-pwm_ledserver_esp32-on-esp32s2_dev)
   * [11. PWM_LEDServer_ESP8266 on ESP8266_NODEMCU_ESP12E](#11-pwm_ledserver_esp8266-on-esp8266_nodemcu_esp12e)
+  * [12. SimpleServer_WT32_ETH01 on WT32-ETH01 with ETH_PHY_LAN8720](#12-simpleserver_wt32_eth01-on-wt32-eth01-with-eth_phy_lan8720)
 * [Debug](#debug)
 * [Troubleshooting](#troubleshooting)
 * [Releases](#releases)
@@ -161,7 +166,7 @@
 
   Many of us are **manually port-forwarding** in Internet Gateway Device (IGD, Router) in order to provide access to local Web Services from the Internet.
   
-  This library provides the easier way to automatically port-forward by using the [**Simple Service Discovery Protocol (SSDP)**](https://tools.ietf.org/html/draft-cai-ssdp-v1-03), running on nRF52, SAMD21/SAMD51, STM32F/L/H/G/WB/MP1, Teensy, ESP8266/ESP32, using ESP WiFi, WiFiNINA, Ethernet W5x00, ESP8266/ESP32 AT-command WiFi supporting **UDP Multicast**.
+  This library provides the easier way to automatically port-forward by using the [**Simple Service Discovery Protocol (SSDP)**](https://tools.ietf.org/html/draft-cai-ssdp-v1-03), running on nRF52, SAMD21/SAMD51, STM32F/L/H/G/WB/MP1, Teensy, ESP8266/ESP32, WT32_ETH01, etc. using ESP WiFi, WiFiNINA, Ethernet W5x00, LAN8720, ESP8266/ESP32 AT-command WiFi supporting **UDP Multicast**.
   
   The SSDP provides a mechanism whereby network clients, with little or no static configuration, can discover network services. SSDP accomplishes this by providing for multicast discovery support as well as server based notification and discovery routing.
    
@@ -197,6 +202,8 @@
 
   - RP2040-based boards, such as **RASPBERRY_PI_PICO, ADAFRUIT_FEATHER_RP2040 and GENERIC_RP2040**, using [**Arduino-mbed RP2040** core](https://github.com/arduino/ArduinoCore-mbed) or [**Earle Philhower's arduino-pico** core](https://github.com/earlephilhower/arduino-pico).
   
+  - **WT32_ETH01 boards** using ESP32-based boards and LAN8720 Ethernet
+  
 #### Currently supported WiFi shields/modules
 
   - **ESP8266 built-in WiFi**
@@ -210,11 +217,18 @@
   - **Ethernet2 Library is also supported after applying the fix to add Multicast feature**. See [Libraries' Patches](https://github.com/khoih-prog/EthernetWebServer#libraries-patches)
   - ENC28J60 using EthernetENC and UIPEthernet library are not supported as UDP Multicast is not available by design.
   - LAN8742A using STM32Ethernet / STM32 LwIP libraries is not supported as UDP Multicast is not enabled by design, unless you modify the code to add support.
+  - **LAN8720A in WT32-ETH01** using [`WebServer_WT32_ETH01`](https://github.com/khoih-prog/WebServer_WT32_ETH01).
+  
   
 ---
 ---
        
 ## Changelog
+
+### Major Releases v3.3.0
+
+ 1. Add support to **WT32_ETH01 (ESP32 + LAN8720)** boards
+ 2. Add examples with new features
 
 ### Major Releases v3.2.0
 
@@ -248,21 +262,21 @@
  1. [`Arduino IDE 1.8.15+` for Arduino](https://www.arduino.cc/en/Main/Software)
  2. [`ESP32 Core 1.0.6+`](https://github.com/espressif/arduino-esp32) for ESP32-based boards. [![Latest release](https://img.shields.io/github/release/espressif/arduino-esp32.svg)](https://github.com/espressif/arduino-esp32/releases/latest/)
  3. [`ESP32-S2/C3 Core 1.0.6+`](https://github.com/espressif/arduino-esp32) for ESP32-S2/C3-based boards. Must follow [HOWTO Install esp32 core for ESP32-S2 (Saola, AI-Thinker ESP-12K) and ESP32-C3 boards into Arduino IDE](#howto-install-esp32-core-for-esp32-s2-saola-ai-thinker-esp-12k-and-esp32-c3-boards-into-arduino-ide).
- 4. [`ESP8266 Core 3.0.0+`](https://github.com/esp8266/Arduino) for ESP8266-based boards. [![Latest release](https://img.shields.io/github/release/esp8266/Arduino.svg)](https://github.com/esp8266/Arduino/releases/latest/). To use ESP8266 core 2.7.1+ for LittleFS. 
+ 4. [`ESP8266 Core 3.0.1+`](https://github.com/esp8266/Arduino) for ESP8266-based boards. [![Latest release](https://img.shields.io/github/release/esp8266/Arduino.svg)](https://github.com/esp8266/Arduino/releases/latest/). To use ESP8266 core 2.7.1+ for LittleFS. 
  5. [`Arduino AVR core 1.8.3+`](https://github.com/arduino/ArduinoCore-avr) for Arduino (Use Arduino Board Manager) for AVR boards. [![GitHub release](https://img.shields.io/github/release/arduino/ArduinoCore-avr.svg)](https://github.com/arduino/ArduinoCore-avr/releases/latest)
  6. [`Arduino SAM DUE core v1.6.12+`](https://github.com/arduino/ArduinoCore-sam) for SAM DUE ARM Cortex-M3 boards.
  7. [`Arduino SAMD core 1.8.11+`](https://github.com/arduino/ArduinoCore-samd) for SAMD ARM Cortex-M0+ boards. [![GitHub release](https://img.shields.io/github/release/arduino/ArduinoCore-samd.svg)](https://github.com/arduino/ArduinoCore-samd/releases/latest)
  8. [`Adafruit SAMD core 1.7.2+`](https://github.com/adafruit/ArduinoCore-samd) for SAMD ARM Cortex-M0+ and M4 boards (Nano 33 IoT, etc.). [![GitHub release](https://img.shields.io/github/release/adafruit/ArduinoCore-samd.svg)](https://github.com/adafruit/ArduinoCore-samd/releases/latest)
  9. [`Seeeduino SAMD core 1.8.1+`](https://github.com/Seeed-Studio/ArduinoCore-samd) for SAMD21/SAMD51 boards (XIAO M0, Wio Terminal, etc.). [![Latest release](https://img.shields.io/github/release/Seeed-Studio/ArduinoCore-samd.svg)](https://github.com/Seeed-Studio/ArduinoCore-samd/releases/latest/)
  
-10. [`Adafruit nRF52 v0.21.0`](https://github.com/adafruit/Adafruit_nRF52_Arduino) for nRF52 boards such as Adafruit NRF52840_FEATHER, NRF52832_FEATHER, NRF52840_FEATHER_SENSE, NRF52840_ITSYBITSY, NRF52840_CIRCUITPLAY, NRF52840_CLUE, NRF52840_METRO, NRF52840_PCA10056, PARTICLE_XENON, **NINA_B302_ublox**, etc. [![GitHub release](https://img.shields.io/github/release/adafruit/Adafruit_nRF52_Arduino.svg)](https://github.com/adafruit/Adafruit_nRF52_Arduino/releases/latest)
+10. [`Adafruit nRF52 v0.24.0`](https://github.com/adafruit/Adafruit_nRF52_Arduino) for nRF52 boards such as Adafruit NRF52840_FEATHER, NRF52832_FEATHER, NRF52840_FEATHER_SENSE, NRF52840_ITSYBITSY, NRF52840_CIRCUITPLAY, NRF52840_CLUE, NRF52840_METRO, NRF52840_PCA10056, PARTICLE_XENON, **NINA_B302_ublox**, etc. [![GitHub release](https://img.shields.io/github/release/adafruit/Adafruit_nRF52_Arduino.svg)](https://github.com/adafruit/Adafruit_nRF52_Arduino/releases/latest)
  
  **Warnings** : Use [`Adafruit nRF52 v0.22.0+`](https://github.com/adafruit/Adafruit_nRF52_Arduino/releases/tag/0.22.0) will create **compiler errors** to some boards. If so, please use the [`Adafruit nRF52 v0.21.0`](https://github.com/adafruit/Adafruit_nRF52_Arduino/releases/tag/0.21.0) until the issue fixed.
  
 11. [`Arduino Core for STM32 v2.0.0+`](https://github.com/stm32duino/Arduino_Core_STM32) for STM32F/L/H/G/WB/MP1 boards. [![GitHub release](https://img.shields.io/github/release/stm32duino/Arduino_Core_STM32.svg)](https://github.com/stm32duino/Arduino_Core_STM32/releases/latest)
 
-12. [`Arduino mbed_rp2040 core 2.1.0+`](https://github.com/arduino/ArduinoCore-mbed) for Arduino RP2040-based boards, such as **Arduino Nano RP2040 Connect, RASPBERRY_PI_PICO, etc.**. [![GitHub release](https://img.shields.io/github/release/arduino/ArduinoCore-mbed.svg)](https://github.com/arduino/ArduinoCore-mbed/releases/latest)
-13. [`Earle Philhower's arduino-pico core v1.8.2+`](https://github.com/earlephilhower/arduino-pico) for RP2040-based boards such as **RASPBERRY_PI_PICO, ADAFRUIT_FEATHER_RP2040 and GENERIC_RP2040**, etc. [![GitHub release](https://img.shields.io/github/release/earlephilhower/arduino-pico.svg)](https://github.com/earlephilhower/arduino-pico/releases/latest)
+12. [`Arduino mbed_rp2040 core 2.3.1+`](https://github.com/arduino/ArduinoCore-mbed) for Arduino RP2040-based boards, such as **Arduino Nano RP2040 Connect, RASPBERRY_PI_PICO, etc.**. [![GitHub release](https://img.shields.io/github/release/arduino/ArduinoCore-mbed.svg)](https://github.com/arduino/ArduinoCore-mbed/releases/latest)
+13. [`Earle Philhower's arduino-pico core v1.9.2+`](https://github.com/earlephilhower/arduino-pico) for RP2040-based boards such as **RASPBERRY_PI_PICO, ADAFRUIT_FEATHER_RP2040 and GENERIC_RP2040**, etc. [![GitHub release](https://img.shields.io/github/release/earlephilhower/arduino-pico.svg)](https://github.com/earlephilhower/arduino-pico/releases/latest)
 
 
 14. Depending on which Ethernet card you're using:
@@ -270,13 +284,13 @@
    - [`EthernetLarge library v2.0.0+`](https://github.com/OPEnSLab-OSU/EthernetLarge) for W5100, W5200 and W5500.
    - [`Ethernet2 library v1.0.4+`](https://github.com/khoih-prog/Ethernet2) for W5500. [![GitHub release](https://img.shields.io/github/release/adafruit/Ethernet2.svg)](https://github.com/adafruit/Ethernet2/releases/latest)
    - [`Ethernet3 library v1.5.5+`](https://github.com/sstaub/Ethernet3) for W5500/WIZ550io/WIZ850io/USR-ES1 with Wiznet W5500 chip. [![GitHub release](https://img.shields.io/github/release/sstaub/Ethernet3.svg)](https://github.com/sstaub/Ethernet3/releases/latest)
-15. [`WiFiNINA_Generic library v1.8.10-1+`](https://github.com/khoih-prog/WiFiNINA_Generic) to use WiFiNINA modules/shields. To install. check [![arduino-library-badge](https://www.ardu-badge.com/badge/WiFiNINA_Generic.svg?)](https://www.ardu-badge.com/WiFiNINA_Generic) if using WiFiNINA for boards such as Nano 33 IoT, nRF52, Teensy, etc.
+15. [`WiFiNINA_Generic library v1.8.12+`](https://github.com/khoih-prog/WiFiNINA_Generic) to use WiFiNINA modules/shields. To install. check [![arduino-library-badge](https://www.ardu-badge.com/badge/WiFiNINA_Generic.svg?)](https://www.ardu-badge.com/WiFiNINA_Generic) if using WiFiNINA for boards such as Nano 33 IoT, nRF52, Teensy, etc.
 16. [`WiFiWebServer library v1.2.0+`](https://github.com/khoih-prog/WiFiWebServer) to use WiFi/WiFiNINA modules/shields. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/WiFiWebServer.svg?)](https://www.ardu-badge.com/WiFiWebServer)
 17. [`EthernetWebServer library v1.5.0+`](https://github.com/khoih-prog/EthernetWebServer) to use Ethernet modules/shields on boards other than STM32F/L/H/G/WB/MP1. To install. check [![arduino-library-badge](https://www.ardu-badge.com/badge/EthernetWebServer.svg?)](https://www.ardu-badge.com/EthernetWebServer).
 18. [`EthernetWebServer_STM32 library v1.2.0+`](https://github.com/khoih-prog/EthernetWebServer_STM32) to use Ethernet modules/shields on STM32F/L/H/G/WB/MP1 boards. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/EthernetWebServer_STM32.svg?)](https://www.ardu-badge.com/EthernetWebServer_STM32).
 19. [`ESP8266_AT_WebServer library v1.3.0+`](https://github.com/khoih-prog/ESP8266_AT_WebServer) to use ESP8266-AT/ESP32-AT WiFi modules/shields. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP8266_AT_WebServer.svg?)](https://www.ardu-badge.com/ESP8266_AT_WebServer)
-20. [`DDNS_Generic library v1.3.0+`](https://github.com/khoih-prog/DDNS_Generic) to use examples. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/DDNS_Generic.svg?)](https://www.ardu-badge.com/DDNS_Generic)
-
+20. [`DDNS_Generic library v1.4.0+`](https://github.com/khoih-prog/DDNS_Generic) to use examples. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/DDNS_Generic.svg?)](https://www.ardu-badge.com/DDNS_Generic)
+21. [`WebServer_WT32_ETH01 library v1.2.0+`](https://github.com/khoih-prog/WebServer_WT32_ETH01) to use WT32_ETH01 (ESP32 + LAN8720). To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/WebServer_WT32_ETH01.svg?)](https://www.ardu-badge.com/WebServer_WT32_ETH01).
 
 ---
 
@@ -562,7 +576,9 @@ To add UDP Multicast support, necessary for the [**UPnP_Generic library**](https
 To fix [`ESP32 compile error`](https://github.com/espressif/arduino-esp32), just copy the following file into the [`ESP32`](https://github.com/espressif/arduino-esp32) cores/esp32 directory (e.g. ./arduino-1.8.12/hardware/espressif/cores/esp32) to overwrite the old file:
 - [Server.h](LibraryPatches/esp32/cores/esp32/Server.h)
 
+#### 8. For STM32 core F3 and F4 using UIPEthernet library
 
+Check if you need to install the UIPEthernet patch [new STM32 core F3/F4 compatibility](https://github.com/UIPEthernet/UIPEthernet/commit/c6d6519a260166b722b9cee5dd1f0fb2682e6782) to avoid errors `#include HardwareSPI.h` on some STM32 boards (Nucleo-32 F303K8, etc.)
 
 ---
 ---
@@ -1054,6 +1070,14 @@ uPnP->printAllPortMappings();
 26. [STM32_PWM_LEDServer](examples/Generic/ESP_AT/STM32/STM32_PWM_LEDServer)
 
 ---
+
+### E. For WT32_ETH01 boards
+
+27. [SimpleServer_WT32_ETH01](examples/WT32_ETH01/SimpleServer_WT32_ETH01)
+28. [PWM_LEDServer_WT32_ETH01](examples/WT32_ETH01/PWM_LEDServer_WT32_ETH01)
+
+
+---
 ---
 
 ### Example [nRF52_SimpleServer](examples/Generic/Ethernet/nRF52/nRF52_SimpleServer)
@@ -1485,7 +1509,7 @@ Debug terminal output when running example [SAMD_SimpleServer](examples/Generic/
 
 ```
 Start SAMD_SimpleServer on SAMD_NANO_33_IOT with WiFiNINA using WiFiNINA_Generic Library
-UPnP_Generic v3.2.0
+UPnP_Generic v3.3.0
 Connecting to HueNet1
 
 IP address: 192.168.2.128
@@ -1533,7 +1557,7 @@ Debug terminal output when running example [nRF52_SimpleServer](examples/Generic
 
 ```
 Start nRF52_SimpleServer on NRF52840_FEATHER with W5x00 & Ethernet2 Library
-UPnP_Generic v3.2.0
+UPnP_Generic v3.3.0
 Try # 1
 [UPnP] IGD current port mappings:
 0.   Blynk Server                  192.168.2.110     9443   9443   TCP    0
@@ -1574,7 +1598,7 @@ Debug terminal output when running example [nRF52_SimpleServer](examples/Generic
 
 ```
 Start nRF52_SimpleServer on NRF52840_FEATHER with W5x00 & Ethernet Library
-UPnP_Generic v3.2.0
+UPnP_Generic v3.3.0
 _pinCS = 0
 W5100 init, using SS_PIN_DEFAULT = 10, new ss_pin = 10, W5100Class::ss_pin = 10
 W5100::init: W5500, SSIZE =4096
@@ -1628,7 +1652,7 @@ Debug terminal output when running example [STM32_SimpleServer](examples/Generic
 
 ```
 Start STM32_SimpleServer on NUCLEO_F767ZI with W5x00 & Ethernet2 Library
-UPnP_Generic v3.2.0
+UPnP_Generic v3.3.0
 Add Port Forwarding, Try # 1
 [UPnP] IGD current port mappings:
 0.   Blynk Server                  192.168.2.110     9443   9443   TCP    0
@@ -1671,7 +1695,7 @@ Debug terminal output when running example [SAMD_SimpleServer](examples/Generic/
 
 ```
 Start SAMD_SimpleServer on ITSYBITSY_M4 with ESP8266_AT shield
-UPnP_Generic v3.2.0
+UPnP_Generic v3.3.0
 WiFi shield init done
 
 Connected to HueNet1
@@ -1723,7 +1747,7 @@ Debug terminal output when running example [PWM_LEDServer_ESP32](examples/ESP/PW
 
 ```
 Start PWM_LEDServer_ESP32 on ESP32_DEV
-UPnP_Generic v3.2.0
+UPnP_Generic v3.3.0
 Connecting to HueNet1
 ..
 IP address: 192.168.2.82
@@ -1773,7 +1797,7 @@ Debug terminal output when running example [RP2040_PWM_LEDServer](examples/Gener
 
 ```
 Start RP2040_PWM_LEDServer on MBED NANO_RP2040_CONNECT with WiFiNINA using WiFiNINA_Generic Library
-UPnP_Generic v3.2.0
+UPnP_Generic v3.3.0
 Connecting to HueNet1
 
 IP address: 192.168.2.153
@@ -1813,7 +1837,7 @@ Debug terminal output when running example [RP2040_PWM_LEDServer](examples/Gener
 
 ```
 Start RP2040_PWM_LEDServer on RASPBERRY_PI_PICO with W5x00 using Ethernet2 Library
-UPnP_Generic v3.2.0
+UPnP_Generic v3.3.0
 Default SPI pinout:
 MOSI:19
 MISO:16
@@ -1860,7 +1884,7 @@ Debug terminal output when running example [RP2040_SimpleServer](examples/Generi
 
 ```
 Start RP2040_SimpleServer on MBED RASPBERRY_PI_PICO using W5x00 using Ethernet2 Library
-UPnP_Generic v3.2.0
+UPnP_Generic v3.3.0
 Default SPI pinout:
 MOSI:3
 MISO:4
@@ -1906,7 +1930,7 @@ Debug terminal output when running example [PWM_LEDServer_ESP32](examples/ESP/PW
 
 ```
 Start PWM_LEDServer_ESP32 on ESP32S2_DEV
-UPnP_Generic v3.2.0
+UPnP_Generic v3.3.0
 Connecting to HueNet1
 .......
 IP address: 192.168.2.190
@@ -1945,7 +1969,7 @@ Debug terminal output when running example [PWM_LEDServer_ESP32](examples/ESP/PW
 
 ```
 Start PWM_LEDServer_ESP8266 on ESP8266_NODEMCU_ESP12E
-UPnP_Generic v3.2.0
+UPnP_Generic v3.3.0
 Connecting to HueNet1
 ...........
 IP address: 192.168.2.135
@@ -1977,6 +2001,93 @@ DDNSGeneric - IP Change Detected: aaa.bbb.ccc.ddd
 ```
 
 ---
+
+#### 12. SimpleServer_WT32_ETH01 on WT32-ETH01 with ETH_PHY_LAN8720
+
+Debug terminal output when running example [SimpleServer_WT32_ETH01](examples/WT32_ETH01/SimpleServer_WT32_ETH01) on WT32-ETH01 with ETH_PHY_LAN8720
+
+```
+Start SimpleServer_WT32_ETH01 on WT32-ETH01 with ETH_PHY_LAN8720
+WebServer_WT32_ETH01 v1.2.0
+DDNS_Generic v1.4.0
+UPnP_Generic v3.3.0
+ETH MAC: A8:03:2A:A1:61:73, IPv4: 192.168.2.232
+FULL_DUPLEX, 100Mbps
+IP address: 192.168.2.232
+[UPnP] UDP_TX_PACKET_MAX_SIZE= 1000
+[UPnP] UDP_TX_RESPONSE_MAX_SIZE= 8192
+[UPnP] newUpnpRule= 0.0.0.0
+Add Port Forwarding, Try # 1
+[UPnP] Testing WT32_ETH01 Ethernet connection for IP : 192.168.2.232
+ ==> GOOD
+[UPnP] Internet connection GOOD
+[UPnP] isGatewayInfoValid : 0.0.0.0 , port : 0
+[UPnP] Path :  , actionPort : 0
+[UPnP] actionPath :  , serviceTypeName : 
+[UPnP] Gateway info not valid
+
+[UPnP] GW IP = 192.168.2.1
+[UPnP] Sending M-SEARCH to : 239.255.255.250 , Port : 1900
+[UPnP] Received packet, size = 331 , IP = 192.168.2.1
+[UPnP] Port = 1900
+[UPnP] IGD found
+[UPnP] IGD location found : http://192.168.2.1:5431/dyndev/uuid:2166898a-7de8-40ed-a1e1-b29a1d140d04
+[UPnP] 192.168.2.1
+[UPnP] 5431
+[UPnP] /dyndev/uuid:2166898a-7de8-40ed-a1e1-b29a1d140d04
+[UPnP] Connecting to IGD with host : 192.168.2.1 , port : 5431
+[UPnP] Connected to IGD
+[UPnP] called getIGDEventURLs
+[UPnP] deviceInfo->actionPath :  , deviceInfo->path : /dyndev/uuid:2166898a-7de8-40ed-a1e1-b29a1d140d04
+[UPnP] URLBase tag found : http://192.168.2.1:5431/
+[UPnP] Translated to base host : 192.168.2.1  and base port : 5431
+[UPnP] urn:schemas-upnp-org:service:WANPPPConnection:1 service found!
+[UPnP] controlURL tag found! Setting actionPath to : /uuid:a4781538-557f-46eb-91f0-c898f3a661d5/WANPPPConnection:1
+[UPnP] Port : 5431 , actionPort : 5431
+[UPnP] isGatewayInfoValid : 192.168.2.1 , port : 5431
+[UPnP] Path : /dyndev/uuid:2166898a-7de8-40ed-a1e1-b29a1d140d04 , actionPort : 5431
+[UPnP] actionPath : /uuid:a4781538-557f-46eb-91f0-c898f3a661d5/WANPPPConnection:1 , serviceTypeName : urn:schemas-upnp-org:service:WANPPPConnection:1
+[UPnP] Gateway info valid
+[UPnP] Verify port mapping for rule : ESP32_DEV-WT32_ETH01
+[UPnP] Apply action : GetSpecificPortMappingEntry  on port mapping : ESP32_DEV-WT32_ETH01
+[UPnP] Connecting to IGD with host : 192.168.2.1 , port : 5431
+[UPnP] Connected to IGD
+[UPnP] Host: 192.168.2.1:5431
+[UPnP] Port mapping found in IGD
+[UPnP] All port mappings found in IGD, doing nothing
+[UPnP] isGatewayInfoValid : 192.168.2.1 , port : 5431
+[UPnP] Path : /dyndev/uuid:2166898a-7de8-40ed-a1e1-b29a1d140d04 , actionPort : 5431
+[UPnP] actionPath : /uuid:a4781538-557f-46eb-91f0-c898f3a661d5/WANPPPConnection:1 , serviceTypeName : urn:schemas-upnp-org:service:WANPPPConnection:1
+[UPnP] Gateway info valid
+[UPnP] Connecting to IGD with host : 192.168.2.1 , port : 5431
+[UPnP] Connected to IGD
+[UPnP] IGD current port mappings:
+0.   Blynk Server                  192.168.2.110     9443   9443   TCP    0      
+1.   Blynk WebServer               192.168.2.110     80     80     TCP    0      
+2.   Blynk Hardware Server         192.168.2.110     8080   8080   TCP    0      
+3.   Blynk Server                  192.168.2.110     9443   1443   TCP    0      
+4.   Blynk Secondary Server        192.168.2.112     9443   2443   TCP    0      
+5.   Blynk Sec. Hardware Server    192.168.2.112     8080   1080   TCP    0      
+6.   Blynk Server SSL              192.168.2.110     9443   443    TCP    0      
+7.   MariaDB / MySQL               192.168.2.112     5698   5698   TCP    0      
+8.   MariaDB / MySQL               192.168.2.112     3306   3306   TCP    0      
+9.   ESP8266_NODEMCU_ESP12E-WIFI   192.168.2.36      8266   8266   TCP    33690  
+76.  ESP32_DEV-WT32_ETH01          192.168.2.232     5931   5931   TCP    35070  
+
+UPnP done
+HTTP WiFiWebServer is @ IP : 192.168.2.232, port = 5931
+Gateway Address: 192.168.2.1
+Network Mask: 255.255.255.0
+DDNSGeneric - IP Change Detected: aaa.bbb.ccc.ddd
+[DDNS] Updated IP = aaa.bbb.ccc.ddd
+```
+
+<p align="center">
+  <img src="https://github.com/khoih-prog/UPnP_Generic/blob/master/pics/WT32_ETH01.png">
+</p>
+
+
+---
 ---
 
 ### Debug
@@ -2003,6 +2114,11 @@ Sometimes, the library will only work if you update the core to the newer or old
 
 
 ## Releases
+
+### Major Releases v3.3.0
+
+ 1. Add support to **WT32_ETH01 (ESP32 + LAN8720)** boards
+ 2. Add examples with new features
 
 ### Major Releases v3.2.0
 
@@ -2046,6 +2162,8 @@ Sometimes, the library will only work if you update the core to the newer or old
 
   - RP2040-based boards, such as **RASPBERRY_PI_PICO, ADAFRUIT_FEATHER_RP2040 and GENERIC_RP2040**, using [**Arduino-mbed RP2040** core](https://github.com/arduino/ArduinoCore-mbed) or [**Earle Philhower's arduino-pico** core](https://github.com/earlephilhower/arduino-pico).
   
+  - **WT32_ETH01 boards** using ESP32-based boards and LAN8720 Ethernet
+  
 #### Currently supported WiFi shields/modules
 
   - **ESP8266 built-in WiFi**
@@ -2059,6 +2177,7 @@ Sometimes, the library will only work if you update the core to the newer or old
   - **Ethernet2 Library is also supported after applying the fix to add Multicast feature**. See [Libraries' Patches](https://github.com/khoih-prog/EthernetWebServer#libraries-patches)
   - ENC28J60 using EthernetENC and UIPEthernet library are not supported as UDP Multicast is not available by design.
   - LAN8742A using STM32Ethernet / STM32 LwIP libraries is not supported as UDP Multicast is not enabled by design, unless you modify the code to add support.
+  - **LAN8720A in WT32-ETH01** using [`WebServer_WT32_ETH01`](https://github.com/khoih-prog/WebServer_WT32_ETH01).
   
   
 ---
@@ -2092,6 +2211,7 @@ Submit issues to: [UPnP_Generic issues](https://github.com/khoih-prog/UPnP_Gener
 10. Add support to RP2040-based boards, such as **RASPBERRY_PI_PICO, ADAFRUIT_FEATHER_RP2040 and GENERIC_RP2040**, using [**Earle Philhower's arduino-pico core**](https://github.com/earlephilhower/arduino-pico).
 11. Add support to RP2040-based boards, such as **NANO_RP2040_CONNECT, RASPBERRY_PI_PICO, ADAFRUIT_FEATHER_RP2040 and GENERIC_RP2040**, using [**Arduino-mbed RP2040** core](https://github.com/arduino/ArduinoCore-mbed).
 12. Add Version String and Table of Contents
+13. Add support to **WT32_ETH01 boards** using ESP32-based boards and LAN8720 Ethernet
  
 ---
 ---
