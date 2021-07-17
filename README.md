@@ -126,7 +126,7 @@
     * [3. STM32](#3-STM32-2)
       * [25. STM32_SimpleServer](examples/Generic/ESP_AT/STM32/STM32_SimpleServer)
       * [26. STM32_PWM_LEDServer](examples/Generic/ESP_AT/STM32/STM32_PWM_LEDServer)
-  * [E. For WT32_ETH01 boards](#a-for-wt32_eth01-boards)
+  * [E. For WT32_ETH01 boards](#e-for-wt32_eth01-boards)
     * [ 27. SimpleServer_WT32_ETH01](examples/WT32_ETH01/SimpleServer_WT32_ETH01)
     * [ 28. PWM_LEDServer_WT32_ETH01](examples/WT32_ETH01/PWM_LEDServer_WT32_ETH01)
 * [Example nRF52_SimpleServer](#example-nrf52_simpleserver)
