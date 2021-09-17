@@ -83,7 +83,7 @@
     * [2. SAMD](#2-samd-2)
     * [3. STM32](#3-STM32-2)
   * [E. For WT32_ETH01 boards](#e-for-wt32_eth01-boards)
-  * [F. For WiFi shields](#c-for-wifi-shields)
+  * [F. For WiFi shields](#f-for-wifi-shields)
     * [1. PORTENTA_H7](#1-PORTENTA_H7)
 * [Example nRF52_SimpleServer](#example-nrf52_simpleserver)
   * [1. File nRF52_SimpleServer.ino](#1-file-nrf52_simpleserverino)
@@ -181,7 +181,7 @@
   - Portenta_H7 using Ethernet from [Portenta Vision shields](https://store-usa.arduino.cc/products/arduino-portenta-vision-shield-ethernet)
   
 <p align="center">
-    <img src="https://github.com/khoih-prog/UPnP_Generic/blob/main/pics/Portenta_Vision.jpg">
+    <img src="https://github.com/khoih-prog/UPnP_Generic/blob/master/pics/Portenta_Vision.jpg">
 </p>
   
 ---
