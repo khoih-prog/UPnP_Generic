@@ -1,5 +1,5 @@
 /****************************************************************************************************************************
-  SAMD_PWM_LEDServer.ino
+  Portenta_H7_SimpleServer.ino
   
   For all Generic boards such as ESP8266, ESP32, WT32_ETH01, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1,Teensy, Portenta_H7
   with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266/ESP32-AT, W5x00, ENC28J60, Native-Ethernet, Portenta Ethernet/WiFi
@@ -13,31 +13,26 @@
  *****************************************************************************************************************************/
 /*
   Note: This example uses the DDNS_Generic library (https://github.com/khoih-prog/DDNS_Generic)
-        You can access this WebServer by either localIP:LISTEN_PORT such as 192.169.2.100:5991/?percentage=20
-        or DDNS_Host:LISTEN_PORT, such as account.duckdns.org:5991/?percentage=20
+        You can access this WebServer by either localIP:LISTEN_PORT such as 192.169.2.100:6032
+        or DDNS_Host:LISTEN_PORT, such as account.duckdns.org:6032
 */
 
 #include "defines.h"
 
 #define UPNP_USING_ETHERNET     true
+#define UPNP_USING_WIFI         false
 
 #include <UPnP_Generic.h>
 
-#define LISTEN_PORT         5991
+#define LISTEN_PORT         6032
 #define LEASE_DURATION      36000  // seconds
-#define FRIENDLY_NAME       "SAMD-LED-W5X00"  // this name will appear in your router port forwarding section
+#define FRIENDLY_NAME       "Portenta_H7-ETH"  // this name will appear in your router port forwarding section
 
 UPnP* uPnP;
 
 EthernetWebServer server(LISTEN_PORT);
 
-#define LED_REVERSED      false
-#define LED_ON            0
-#define LED_OFF           100
-
-#define LED_PIN           13     // LED_BUILTIN
-
-const int delayval = 10;
+const int led = 13;
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
@@ -47,87 +42,43 @@ void onUpdateCallback(const char* oldIP, const char* newIP)
   Serial.println(newIP);
 }
 
-// 0 <= percentage <= 100
-void setPower(uint32_t percentage)
-{
-  long pwm_val = map(percentage, LED_OFF, LED_ON, 0, 1023);
-
-  if (pwm_val > 1023)
-  {
-    pwm_val = 1023;
-  }
-
-  analogWrite(LED_PIN, pwm_val);
-}
-
-void fadeOn(void)
-{
-#if LED_REVERSED  
-  for (int i = 100; i >= 0; i--)
-#else  
-  for (int i = 0; i < 100; i++)
-#endif
-  {
-    setPower(i);
-    delay(delayval);
-  }
-}
-
-void fadeOff(void)
-{
-#if LED_REVERSED  
-  for (int i = 0; i < 100; i++)
-#else  
-  for (int i = 100; i >= 0; i--)
-#endif  
-  {
-    setPower(i);
-    delay(delayval);
-  }
-}
-
-void showLED(void)
-{
-  for (int i = 0; i < 2; i++)
-  {  
-    fadeOn();
-    fadeOff(); 
-  }
-}
-  
 void handleRoot()
 {
-  String message = F("Hello from ");
+#define BUFFER_SIZE     400
+  
+  digitalWrite(led, 1);
+  char temp[BUFFER_SIZE];
+  int sec = millis() / 1000;
+  int min = sec / 60;
+  int hr = min / 60;
+  int day = hr / 24;
+  
+  hr = hr % 24;
 
-  message += String(BOARD_NAME);
-  message += F(" running UPnP_Generic & DDNS_Generic\n");
-  message += F("on ");
-  message += String(SHIELD_TYPE);
-  message += F("\nNumber of args received: ");
-  message += server.args();  // get number of parameters
-  message += F("\n");
+  snprintf_P(temp, BUFFER_SIZE - 1,
+           PSTR("<html>\
+<head>\
+<meta http-equiv='refresh' content='5'/>\
+<title>%s</title>\
+<style>\
+body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Color: #000088; }\
+</style>\
+</head>\
+<body>\
+<h1>Hello from %s</h1>\
+<h3>running UPnP_Generic & DDNS_Generic</h3>\
+<h3>on %s</h3>\
+<p>Uptime: %d d %02d:%02d:%02d</p>\
+</body>\
+</html>"), BOARD_NAME, BOARD_NAME, SHIELD_TYPE, day, hr, min % 60, sec % 60);
 
-  int percentage = 0;
-
-  for (int i = 0; i < server.args(); i++)
-  {
-    message += "Arg #" + (String)i + " => ";
-    message += server.argName(i) + ": ";  // get the name of the parameter
-    message += server.arg(i) + "\n";  // get the value of the parameter
-
-    if (server.argName(i).equals("percentage"))
-    {
-      percentage = server.arg(i).toInt();
-    }
-  }
-
-  server.send(200, F("text/plain"), message);       //Response to the HTTP request
-
-  setPower(percentage);
+  server.send(200, F("text/html"), temp);
+  digitalWrite(led, 0);
 }
 
 void handleNotFound() 
 {
+  digitalWrite(led, 1);
   String message = F("File Not Found\n\n");
   
   message += F("URI: ");
@@ -144,52 +95,22 @@ void handleNotFound()
   }
   
   server.send(404, F("text/plain"), message);
+  digitalWrite(led, 0);
 }
 
 void setup(void) 
 {
+  pinMode(led, OUTPUT);
+  digitalWrite(led, 0);
+  
   Serial.begin(115200);
   while (!Serial);
 
-  Serial.print("\nStart SAMD_PWM_LEDServer on "); Serial.print(BOARD_NAME);
+  Serial.print("\nStart Portenta_H7_SimpleServer on "); Serial.print(BOARD_NAME);
   Serial.print(" using "); Serial.println(SHIELD_TYPE);
   Serial.println(UPNP_GENERIC_VERSION);
 
-  pinMode(LED_PIN,OUTPUT);
-
-  showLED();
-  
-  ET_LOGWARN3(F("Board :"), BOARD_NAME, F(", setCsPin:"), USE_THIS_SS_PIN);
-
-  ET_LOGWARN(F("Default SPI pinout:"));
-  ET_LOGWARN1(F("MOSI:"), MOSI);
-  ET_LOGWARN1(F("MISO:"), MISO);
-  ET_LOGWARN1(F("SCK:"),  SCK);
-  ET_LOGWARN1(F("SS:"),   SS);
-  ET_LOGWARN(F("========================="));
-
-  #if !(USE_BUILTIN_ETHERNET || USE_UIP_ETHERNET)
-    // For other boards, to change if necessary
-    #if ( USE_ETHERNET || USE_ETHERNET_LARGE || USE_ETHERNET2  || USE_ETHERNET_ENC )
-      // Must use library patch for Ethernet, Ethernet2, EthernetLarge libraries
-      Ethernet.init (USE_THIS_SS_PIN);
-    
-    #elif USE_ETHERNET3
-      // Use  MAX_SOCK_NUM = 4 for 4K, 2 for 8K, 1 for 16K RX/TX buffer
-      #ifndef ETHERNET3_MAX_SOCK_NUM
-        #define ETHERNET3_MAX_SOCK_NUM      4
-      #endif
-    
-      Ethernet.setCsPin (USE_THIS_SS_PIN);
-      Ethernet.init (ETHERNET3_MAX_SOCK_NUM);
-  
-    #elif USE_CUSTOM_ETHERNET
-      // You have to add initialization for your Custom Ethernet here
-      // This is just an example to setCSPin to USE_THIS_SS_PIN, and can be not correct and enough
-      //Ethernet.init(USE_THIS_SS_PIN);
-      
-    #endif  //( ( USE_ETHERNET || USE_ETHERNET_LARGE || USE_ETHERNET2  || USE_ETHERNET_ENC )
-  #endif
+  ////////////////
   
   // start the ethernet connection and the server:
   // Use DHCP dynamic IP and random mac
@@ -201,7 +122,7 @@ void setup(void)
   IPAddress localIP = Ethernet.localIP();
 
   ////////////////
-
+  
   DDNSGeneric.service("duckdns");    // Enter your DDNS Service Name - "duckdns" / "noip"
 
   /*
@@ -252,9 +173,7 @@ void setup(void)
 
     Serial.println(F("\nUPnP done"));
   }
-
-  showLED();
-
+  
   server.on(F("/"), handleRoot);
 
   server.on(F("/inline"), []()
@@ -265,22 +184,15 @@ void setup(void)
   server.onNotFound(handleNotFound);
 
   server.begin();
-  
+
   Serial.print(F("HTTP EthernetWebServer is @ IP : "));
   Serial.print(localIP); 
   Serial.print(F(", port = "));
   Serial.println(LISTEN_PORT);
-
-  Serial.print(F("Gateway Address: "));
-  Serial.println(Ethernet.gatewayIP());
-  Serial.print(F("Network Mask: "));
-  Serial.println(Ethernet.subnetMask());
 }
 
 void loop(void) 
 {
-  //delay(100);
-  
   DDNSGeneric.update(300000);
 
   uPnP->updatePortMappings(600000);  // 10 minutes

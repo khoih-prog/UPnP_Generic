@@ -14,8 +14,8 @@ If you don't find anything, please [open a new issue](https://github.com/khoih-p
 
 Please ensure to specify the following:
 
-* Arduino IDE version (e.g. 1.8.15) or Platform.io version
-* `SAMD` Core Version (e.g. Arduino SAMD core v1.8.11, Adafruit SAMD core v1.7.2, Seeed Studio SAMD v1.8.1)
+* Arduino IDE version (e.g. 1.8.16) or Platform.io version
+* Board Core Version (e.g. Arduino SAMDUE core v1.6.12, ESP8266 core v3.0.2, etc.)
 * Contextual information (e.g. what you were trying to achieve)
 * Simplest possible steps to reproduce
 * Anything that might be relevant in your opinion, such as:
@@ -26,13 +26,14 @@ Please ensure to specify the following:
 ### Example
 
 ```
-Arduino IDE version: 1.8.15
-Arduino SAMD Core Version 1.8.11
+Arduino IDE version: 1.8.16
+`ArduinoCore-mbed` mbed_portenta core v2.4.1
+Portenta_H7 Rev2 ABX00042
 OS: Ubuntu 20.04 LTS
-Linux xy-Inspiron-3593 5.4.0-77-generic #86-Ubuntu SMP Thu Jun 17 02:35:03 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
+Linux xy-Inspiron-3593 5.4.0-84-generic #94-Ubuntu SMP Thu Aug 26 20:27:37 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
 
 Context:
-The board couldn't autoreconnect to Local Blynk Server after router power recycling.
+I encountered a crash while trying to use the Timer Interrupt.
 
 Steps to reproduce:
 1. ...

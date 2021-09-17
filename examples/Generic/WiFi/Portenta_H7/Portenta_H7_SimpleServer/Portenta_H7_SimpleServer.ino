@@ -1,5 +1,5 @@
 /****************************************************************************************************************************
-  STM32_SimpleServer.ino
+  Portenta_H7_SimpleServer.ino
   
   For all Generic boards such as ESP8266, ESP32, WT32_ETH01, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1,Teensy, Portenta_H7
   with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266/ESP32-AT, W5x00, ENC28J60, Native-Ethernet, Portenta Ethernet/WiFi
@@ -11,11 +11,10 @@
   Built by Khoi Hoang https://github.com/khoih-prog/UPnP_Generic
   Licensed under GPL-3.0 license
  *****************************************************************************************************************************/
-
 /*
   Note: This example uses the DDNS_Generic library (https://github.com/khoih-prog/DDNS_Generic)
-        You can access this WebServer by either localIP:LISTEN_PORT such as 192.169.2.100:7032
-        or DDNS_Host:LISTEN_PORT, such as account.duckdns.org:7032
+        You can access this WebServer by either localIP:LISTEN_PORT such as 192.169.2.100:6052
+        or DDNS_Host:LISTEN_PORT, such as account.duckdns.org:6052
 */
 
 #include "defines.h"
@@ -25,22 +24,20 @@
 
 #include <UPnP_Generic.h>
 
-#define LISTEN_PORT         7032
+#define LISTEN_PORT         6032
 #define LEASE_DURATION      36000  // seconds
-#define FRIENDLY_NAME       "STM32-WIFI-ESPAT"  // this name will appear in your router port forwarding section
+#define FRIENDLY_NAME       "Portenta_H7-WIFI"  // this name will appear in your router port forwarding section
 
 UPnP* uPnP;
 
-ESP8266_AT_WebServer *server;
+WiFiWebServer server(LISTEN_PORT);
 
 const int led = 13;
 int status    = WL_IDLE_STATUS;     // the Wifi radio's status
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
-  Serial.print(F("DDNSGeneric - IP Change Detected: oldIP = "));
-  Serial.print(oldIP);
-  Serial.print(F(", newIP = "));
+  Serial.print(F("DDNSGeneric - IP Change Detected: "));
   Serial.println(newIP);
 }
 
@@ -57,8 +54,8 @@ void handleRoot()
 
   hr = hr % 24;
 
-  snprintf(temp, BUFFER_SIZE - 1,
-           "<html>\
+  snprintf_P(temp, BUFFER_SIZE - 1,
+           PSTR("<html>\
 <head>\
 <meta http-equiv='refresh' content='5'/>\
 <title>%s</title>\
@@ -72,9 +69,9 @@ body { background-color: #cccccc; font-family: Arial, Helvetica, Sans-Serif; Col
 <h3>on %s</h3>\
 <p>Uptime: %d d %02d:%02d:%02d</p>\
 </body>\
-</html>", BOARD_NAME, BOARD_NAME, SHIELD_TYPE, day, hr, min % 60, sec % 60);
+</html>"), BOARD_NAME, BOARD_NAME, SHIELD_TYPE, day, hr, min % 60, sec % 60);
 
-  server->send(200, F("text/html"), temp);
+  server.send(200, F("text/html"), temp);
   digitalWrite(led, 0);
 }
 
@@ -84,19 +81,19 @@ void handleNotFound()
   String message = F("File Not Found\n\n");
   
   message += F("URI: ");
-  message += server->uri();
+  message += server.uri();
   message += F("\nMethod: ");
-  message += (server->method() == HTTP_GET) ? F("GET") : F("POST");
+  message += (server.method() == HTTP_GET) ? F("GET") : F("POST");
   message += F("\nArguments: ");
-  message += server->args();
+  message += server.args();
   message += F("\n");
   
-  for (uint8_t i = 0; i < server->args(); i++) 
+  for (uint8_t i = 0; i < server.args(); i++) 
   {
-    message += " " + server->argName(i) + ": " + server->arg(i) + "\n";
+    message += " " + server.argName(i) + ": " + server.arg(i) + "\n";
   }
   
-  server->send(404, F("text/plain"), message);
+  server.send(404, F("text/plain"), message);
   digitalWrite(led, 0);
 }
 
@@ -108,21 +105,9 @@ void setup(void)
   Serial.begin(115200);
   while (!Serial);
 
-  Serial.print("\nStart STM32_SimpleServer on "); Serial.print(BOARD_NAME);
+  Serial.print("\nStart Portenta_H7_SimpleServer on "); Serial.print(BOARD_NAME);
   Serial.print(" using "); Serial.println(SHIELD_TYPE);
   Serial.println(UPNP_GENERIC_VERSION);
-
-  // initialize serial for ESP module
-  EspSerial.begin(115200);
-  // initialize ESP module
-  WiFi.init(&EspSerial);
-
-#if defined(ESP8266_AT_WEBSERVER_VERSION)
-  Serial.print(F("WiFi shield init done. ESP8266_AT_WebServer Version v"));
-  Serial.println(ESP8266_AT_WEBSERVER_VERSION);
-#else
-  Serial.println(F("WiFi shield init done."));
-#endif
 
   // check for the presence of the shield
   if (WiFi.status() == WL_NO_SHIELD)
@@ -151,9 +136,6 @@ void setup(void)
   Serial.print(F("IP address: "));
   Serial.println(localIP);
 
-  Serial.print(F("Gateway IP : "));
-  Serial.println(WiFi.gatewayIP());
-  
   ////////////////
   
   DDNSGeneric.service("duckdns");    // Enter your DDNS Service Name - "duckdns" / "noip"
@@ -171,6 +153,8 @@ void setup(void)
 
   ////////////////
 
+  ////////////////
+
   uPnP = new UPnP(30000);  // -1 means blocking, preferably, use a timeout value (ms)
 
   if (uPnP)
@@ -179,7 +163,7 @@ void setup(void)
 
     bool portMappingAdded = false;
 
-#define RETRY_TIMES     2
+#define RETRY_TIMES     4
     int retries = 0;
 
     while (!portMappingAdded && (retries < RETRY_TIMES))
@@ -206,39 +190,29 @@ void setup(void)
 
     Serial.println(F("\nUPnP done"));
   }
+  
+  server.on(F("/"), handleRoot);
 
-  server = new ESP8266_AT_WebServer(LISTEN_PORT);
-
-  if (server)
+  server.on(F("/inline"), []()
   {
-    server->on(F("/"), handleRoot);
+    server.send(200, F("text/plain"), F("This works as well"));
+  });
+
+  server.onNotFound(handleNotFound);
+
+  server.begin();
   
-    server->on(F("/inline"), []()
-    {
-      server->send(200, F("text/plain"), F("This works as well"));
-    });
-  
-    server->onNotFound(handleNotFound);
-  
-    server->begin();
-  
-    Serial.print(F("HTTP WiFi_ESPAT_WebServer is @ IP : "));
-    Serial.print(localIP); 
-    Serial.print(F(", port = "));
-    Serial.println(LISTEN_PORT);
-  }
+  Serial.print(F("HTTP WiFiWebServer is @ IP : "));
+  Serial.print(localIP); 
+  Serial.print(F(", port = "));
+  Serial.println(LISTEN_PORT);
 }
 
 void loop(void) 
 {
-  DDNSGeneric.update(555000);
+  DDNSGeneric.update(300000);
 
-  // In operation, update 5 minutes before LEASE expires
-  //uPnP->updatePortMappings( (LEASE_DURATION - 300)  * 1000L);
+  uPnP->updatePortMappings(600000);  // 10 minutes
 
-  // For testing
-  uPnP->updatePortMappings(180000);  // 10 minutes
-
-  if (server)
-    server->handleClient();
+  server.handleClient();
 }
