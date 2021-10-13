@@ -12,6 +12,7 @@
 ## Table of Contents
 
 * [Changelog](#changelog)
+  * [Releases v3.4.1](#releases-v341)
   * [Major Releases v3.4.0](#major-releases-v340)
   * [Major Releases v3.3.0](#major-releases-v330)
   * [Major Releases v3.2.0](#major-releases-v320)
@@ -23,6 +24,11 @@
        
 ## Changelog
 
+### Releases v3.4.1
+
+ 1. Update `platform.ini` and `library.json` to use original `khoih-prog` instead of `khoih.prog` after PIO fix
+ 2. Update `Packages' Patches`
+ 
 ### Major Releases v3.4.0
 
  1. Add support to **Portenta_H7**, using either WiFi or Vision-shield Ethernet

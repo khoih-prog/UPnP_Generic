@@ -10,7 +10,7 @@
   Based on and modified from Ofek Pearl's TinyUPnP Library (https://github.com/ofekp/TinyUPnP)
   Built by Khoi Hoang https://github.com/khoih-prog/UPnP_Generic
   Licensed under GPL-3.0 license
-  Version: 3.4.0
+  Version: 3.4.1
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
@@ -19,6 +19,7 @@
   3.2.0  K Hoang      11/06/2021 Add support to RP2040-based boards using ESP-AT, WiFiNINA, W5x00 / ENC28J60
   3.3.0  K Hoang      16/07/2021 Add support to WT32_ETH01 (ESP32 + LAN8720)
   3.4.0  K Hoang      16/09/2021 Add support to Portenta_H7, using either WiFi or Vision-shield Ethernet
+  3.4.1  K Hoang      12/10/2021 Update `platform.ini` and `library.json`
  *****************************************************************************************************************************/
 
 #ifndef UPnP_Generic_Debug_H
