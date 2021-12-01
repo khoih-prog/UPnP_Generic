@@ -1,6 +1,6 @@
 {
   "name": "UPnP_Generic",
-  "version": "3.4.1",
+  "version": "3.4.2",
   "description": "Automatically add port mappings to router using UPnP SSDP for Arduino boards, running on nRF52, SAMD21/SAMD51, STM32F/L/H/G/WB/MP1, Teensy, RP2040-based, WT32_ETH01 boards, Portenta_H7, etc. besides ESP8266/ESP32, using ESP WiFi, WiFiNINA, Ethernet W5x00, LAN8720, ESP8266/ESP32 AT-command WiFi",
   "keywords": "uPnP, SSDP, router, port-mappings, port-forwarding, mbed, wifi, ethernet, wifinina, w5x00, communication, esp32, esp8266, samd, nrf52, stm32, nano-rp2040-connect, rp2040, wt32-eth01, Portenta-H7, rpi-pico, nano-33-iot",
   "authors": 
@@ -29,7 +29,7 @@
     {
       "owner": "khoih-prog",
       "name": "WiFiNINA_Generic",
-      "version": ">=1.8.13",
+      "version": ">=1.8.14-1",
       "platforms": ["*"]
     },
     {
@@ -47,13 +47,13 @@
     {
       "owner": "khoih-prog",
       "name": "WebServer_WT32_ETH01",
-      "version": ">=1.2.0",
+      "version": ">=1.4.1",
       "platforms": ["espressif32"]
     },
     {
       "owner": "khoih-prog",
       "name": "WiFiWebServer",
-      "version": ">=1.4.1",
+      "version": ">=1.4.2",
       "platforms": ["*"]
     },
     {
@@ -65,12 +65,13 @@
     {
       "owner": "khoih-prog",
       "name": "DDNS_Generic",
-      "version": ">=1.5.1",
+      "version": ">=1.6.1",
       "platforms": ["*"]
     }
   ],
   "frameworks": "*",
-  "platforms": "*",
+  "platforms": "*",  
+  "license": "GPL-3.0-or-later",
   "examples": "examples/*/*/*.ino",
-  "license": "GPL-3.0-or-later"
+  "headers": ["UPnP_Generic.h"]
 }

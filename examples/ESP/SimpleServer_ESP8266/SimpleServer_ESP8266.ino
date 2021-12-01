@@ -151,8 +151,7 @@ void setup(void)
     For DDNS Providers where you get username and password: ( Leave the password field empty "" if not required )
     DDNSGeneric.client("domain", "username", "password");
   */
-  //DDNSGeneric.client("account.duckdns.org", "12345678-1234-1234-1234-123456789012");
-  DDNSGeneric.client("khoih.duckdns.org", "59f1e2ed-ab09-4089-875a-8357e2705392");
+  DDNSGeneric.client("account.duckdns.org", "12345678-1234-1234-1234-123456789012");
 
   DDNSGeneric.onUpdate(onUpdateCallback);
 
