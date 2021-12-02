@@ -103,6 +103,7 @@
   * [12. SimpleServer_WT32_ETH01 on WT32-ETH01 with ETH_PHY_LAN8720](#12-simpleserver_wt32_eth01-on-wt32-eth01-with-eth_phy_lan8720)
   * [13. Portenta_H7_SimpleServer on PORTENTA_H7_M7 using Portenta_H7 WiFi](#13-Portenta_H7_SimpleServer-on-PORTENTA_H7_M7-using-Portenta_H7-WiFi)
   * [14. Portenta_H7_SimpleServer on PORTENTA_H7_M7 using Ethernet](#14-Portenta_H7_SimpleServer-on-PORTENTA_H7_M7-using-Ethernet)
+  * [15. T41_QNEthernet_SimpleServer on TEENSY 4.1](#15-T41_QNEthernet_SimpleServer-on-TEENSY-41)
 * [Debug](#debug)
 * [Troubleshooting](#troubleshooting)
 * [Issues](#issues)
@@ -202,20 +203,22 @@
 10. [`Arduino Core for STM32 v2.1.0+`](https://github.com/stm32duino/Arduino_Core_STM32) for STM32F/L/H/G/WB/MP1 boards. [![GitHub release](https://img.shields.io/github/release/stm32duino/Arduino_Core_STM32.svg)](https://github.com/stm32duino/Arduino_Core_STM32/releases/latest)
 11. [`ArduinoCore-mbed mbed_rp2040, mbed_nano, mbed_portenta core 2.6.1+`](https://github.com/arduino/ArduinoCore-mbed) for Arduino (Use Arduino Board Manager) **Portenta_H7, RP2040-based boards, such as Nano_RP2040_Connect, RASPBERRY_PI_PICO**. [![GitHub release](https://img.shields.io/github/release/arduino/ArduinoCore-mbed.svg)](https://github.com/arduino/ArduinoCore-mbed/releases/latest)
 12. [`Earle Philhower's arduino-pico core v1.9.6+`](https://github.com/earlephilhower/arduino-pico) for RP2040-based boards such as **RASPBERRY_PI_PICO, ADAFRUIT_FEATHER_RP2040 and GENERIC_RP2040**, etc. [![GitHub release](https://img.shields.io/github/release/earlephilhower/arduino-pico.svg)](https://github.com/earlephilhower/arduino-pico/releases/latest)
+13. [`Teensy core v1.55+`](https://www.pjrc.com/teensy/td_download.html) for Teensy (4.1, 4.0, 3.6, 3.5, 3,2, 3.1, 3.0) boards.
 
-
-13. Depending on which Ethernet card you're using:
+14. Depending on which Ethernet card you're using:
    - [`Ethernet library v2.0.0+`](https://github.com/arduino-libraries/Ethernet) for W5100, W5200 and W5500.  [![GitHub release](https://img.shields.io/github/release/arduino-libraries/Ethernet.svg)](https://github.com/arduino-libraries/Ethernet/releases/latest)
    - [`EthernetLarge library v2.0.0+`](https://github.com/OPEnSLab-OSU/EthernetLarge) for W5100, W5200 and W5500.
    - [`Ethernet2 library v1.0.4+`](https://github.com/khoih-prog/Ethernet2) for W5500. [![GitHub release](https://img.shields.io/github/release/adafruit/Ethernet2.svg)](https://github.com/adafruit/Ethernet2/releases/latest)
    - [`Ethernet3 library v1.5.5+`](https://github.com/sstaub/Ethernet3) for W5500/WIZ550io/WIZ850io/USR-ES1 with Wiznet W5500 chip. [![GitHub release](https://img.shields.io/github/release/sstaub/Ethernet3.svg)](https://github.com/sstaub/Ethernet3/releases/latest)
-14. [`WiFiNINA_Generic library v1.8.14-1+`](https://github.com/khoih-prog/WiFiNINA_Generic) to use WiFiNINA modules/shields. To install. check [![arduino-library-badge](https://www.ardu-badge.com/badge/WiFiNINA_Generic.svg?)](https://www.ardu-badge.com/WiFiNINA_Generic) if using WiFiNINA for boards such as Nano 33 IoT, nRF52, Teensy, etc.
-15. [`WiFiWebServer library v1.4.2+`](https://github.com/khoih-prog/WiFiWebServer) to use WiFi/WiFiNINA modules/shields. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/WiFiWebServer.svg?)](https://www.ardu-badge.com/WiFiWebServer)
-16. [`EthernetWebServer library v1.7.1+`](https://github.com/khoih-prog/EthernetWebServer) to use Ethernet modules/shields on boards other than STM32F/L/H/G/WB/MP1. To install. check [![arduino-library-badge](https://www.ardu-badge.com/badge/EthernetWebServer.svg?)](https://www.ardu-badge.com/EthernetWebServer).
-17. [`EthernetWebServer_STM32 library v1.2.1+`](https://github.com/khoih-prog/EthernetWebServer_STM32) to use Ethernet modules/shields on STM32F/L/H/G/WB/MP1 boards. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/EthernetWebServer_STM32.svg?)](https://www.ardu-badge.com/EthernetWebServer_STM32).
-18. [`ESP8266_AT_WebServer library v1.4.0+`](https://github.com/khoih-prog/ESP8266_AT_WebServer) to use ESP8266-AT/ESP32-AT WiFi modules/shields. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP8266_AT_WebServer.svg?)](https://www.ardu-badge.com/ESP8266_AT_WebServer)
-19. [`DDNS_Generic library v1.6.1+`](https://github.com/khoih-prog/DDNS_Generic) to use examples. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/DDNS_Generic.svg?)](https://www.ardu-badge.com/DDNS_Generic)
-20. [`WebServer_WT32_ETH01 library v1.4.1+`](https://github.com/khoih-prog/WebServer_WT32_ETH01) to use WT32_ETH01 (ESP32 + LAN8720). To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/WebServer_WT32_ETH01.svg?)](https://www.ardu-badge.com/WebServer_WT32_ETH01).
+15. [`WiFiNINA_Generic library v1.8.14-1+`](https://github.com/khoih-prog/WiFiNINA_Generic) to use WiFiNINA modules/shields. To install. check [![arduino-library-badge](https://www.ardu-badge.com/badge/WiFiNINA_Generic.svg?)](https://www.ardu-badge.com/WiFiNINA_Generic) if using WiFiNINA for boards such as Nano 33 IoT, nRF52, Teensy, etc.
+16. [`WiFiWebServer library v1.4.2+`](https://github.com/khoih-prog/WiFiWebServer) to use WiFi/WiFiNINA modules/shields. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/WiFiWebServer.svg?)](https://www.ardu-badge.com/WiFiWebServer)
+17. [`EthernetWebServer library v1.7.1+`](https://github.com/khoih-prog/EthernetWebServer) to use Ethernet modules/shields on boards other than STM32F/L/H/G/WB/MP1. To install. check [![arduino-library-badge](https://www.ardu-badge.com/badge/EthernetWebServer.svg?)](https://www.ardu-badge.com/EthernetWebServer).
+18. [`EthernetWebServer_STM32 library v1.2.1+`](https://github.com/khoih-prog/EthernetWebServer_STM32) to use Ethernet modules/shields on STM32F/L/H/G/WB/MP1 boards. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/EthernetWebServer_STM32.svg?)](https://www.ardu-badge.com/EthernetWebServer_STM32).
+19. [`ESP8266_AT_WebServer library v1.4.0+`](https://github.com/khoih-prog/ESP8266_AT_WebServer) to use ESP8266-AT/ESP32-AT WiFi modules/shields. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/ESP8266_AT_WebServer.svg?)](https://www.ardu-badge.com/ESP8266_AT_WebServer)
+20. [`DDNS_Generic library v1.6.1+`](https://github.com/khoih-prog/DDNS_Generic) to use examples. To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/DDNS_Generic.svg?)](https://www.ardu-badge.com/DDNS_Generic)
+21. [`WebServer_WT32_ETH01 library v1.4.1+`](https://github.com/khoih-prog/WebServer_WT32_ETH01) to use WT32_ETH01 (ESP32 + LAN8720). To install, check [![arduino-library-badge](https://www.ardu-badge.com/badge/WebServer_WT32_ETH01.svg?)](https://www.ardu-badge.com/WebServer_WT32_ETH01).
+22. [`QNEthernet Library version v0.10.0+`](https://github.com/ssilverman/QNEthernet) for Teensy 4.1 built-in Ethernet. UDP multicast has been supported. **New**
+
 
 ---
 
@@ -823,8 +826,8 @@ uPnP->printAllPortMappings();
  
 #### 2. RP2040
 
- 7. [RP2040_SimpleServer](examples/Generic/Ethernet/RP2040/RP2040_SimpleServer) **New**
- 8. [RP2040_PWM_LEDServer](examples/Generic/Ethernet/RP2040/RP2040_PWM_LEDServer) **New**
+ 7. [RP2040_SimpleServer](examples/Generic/Ethernet/RP2040/RP2040_SimpleServer)
+ 8. [RP2040_PWM_LEDServer](examples/Generic/Ethernet/RP2040/RP2040_PWM_LEDServer)
 
 #### 3. SAMD
 
@@ -841,29 +844,34 @@ uPnP->printAllPortMappings();
 
 13. [Portenta_H7_SimpleServer](examples/Generic/Ethernet/Portenta_H7/Portenta_H7_SimpleServer) **New**
  
+ 
+#### 6. TEENSY_4.1
+
+14. [T41_QNEthernet_SimpleServer](examples/Generic/Ethernet/QNEthernet/T41_QNEthernet_SimpleServer) **New**
+ 
 ---
 
 ### C. For WiFiNINA shields
 
 #### 1. nRF52
 
-14. [nRF52_SimpleServer](examples/Generic/WiFiNINA/nRF52/nRF52_SimpleServer)
-15. [nRF52_PWM_LEDServer](examples/Generic/WiFiNINA/nRF52/nRF52_PWM_LEDServer)
+15. [nRF52_SimpleServer](examples/Generic/WiFiNINA/nRF52/nRF52_SimpleServer)
+16. [nRF52_PWM_LEDServer](examples/Generic/WiFiNINA/nRF52/nRF52_PWM_LEDServer)
 
 #### 2. RP2040
 
-16. [RP2040_SimpleServer](examples/Generic/WiFiNINA/RP2040/RP2040_SimpleServer) **New**
-17. [RP2040_PWM_LEDServer](examples/Generic/WiFiNINA/RP2040/RP2040_PWM_LEDServer) **New**
+17. [RP2040_SimpleServer](examples/Generic/WiFiNINA/RP2040/RP2040_SimpleServer)
+18. [RP2040_PWM_LEDServer](examples/Generic/WiFiNINA/RP2040/RP2040_PWM_LEDServer)
 
 #### 3. SAMD
 
-18. [SAMD_SimpleServer](examples/Generic/WiFiNINA/SAMD/SAMD_SimpleServer)
-19. [SAMD_PWM_LEDServer](examples/Generic/WiFiNINA/SAMD/SAMD_PWM_LEDServer)
+19. [SAMD_SimpleServer](examples/Generic/WiFiNINA/SAMD/SAMD_SimpleServer)
+20. [SAMD_PWM_LEDServer](examples/Generic/WiFiNINA/SAMD/SAMD_PWM_LEDServer)
 
 #### 4. STM32
 
-20. [STM32_SimpleServer](examples/Generic/WiFiNINA/STM32/STM32_SimpleServer)
-21. [STM32_PWM_LEDServer](examples/Generic/WiFiNINA/STM32/STM32_PWM_LEDServer)
+21. [STM32_SimpleServer](examples/Generic/WiFiNINA/STM32/STM32_SimpleServer)
+22. [STM32_PWM_LEDServer](examples/Generic/WiFiNINA/STM32/STM32_PWM_LEDServer)
 
 ---
 
@@ -871,25 +879,25 @@ uPnP->printAllPortMappings();
 
 #### 1. nRF52
 
-22. [nRF52_SimpleServer](examples/Generic/ESP_AT/nRF52/nRF52_SimpleServer)
-23. [nRF52_PWM_LEDServer](examples/Generic/ESP_AT/nRF52/nRF52_PWM_LEDServer)
+23. [nRF52_SimpleServer](examples/Generic/ESP_AT/nRF52/nRF52_SimpleServer)
+24. [nRF52_PWM_LEDServer](examples/Generic/ESP_AT/nRF52/nRF52_PWM_LEDServer)
 
 #### 2. SAMD
 
-24. [SAMD_SimpleServer](examples/Generic/ESP_AT/SAMD/SAMD_SimpleServer)
-25. [SAMD_PWM_LEDServer](examples/Generic/ESP_AT/SAMD/SAMD_PWM_LEDServer)
+25. [SAMD_SimpleServer](examples/Generic/ESP_AT/SAMD/SAMD_SimpleServer)
+26. [SAMD_PWM_LEDServer](examples/Generic/ESP_AT/SAMD/SAMD_PWM_LEDServer)
 
 #### 3. STM32
 
-26. [STM32_SimpleServer](examples/Generic/ESP_AT/STM32/STM32_SimpleServer)
-27. [STM32_PWM_LEDServer](examples/Generic/ESP_AT/STM32/STM32_PWM_LEDServer)
+27. [STM32_SimpleServer](examples/Generic/ESP_AT/STM32/STM32_SimpleServer)
+28. [STM32_PWM_LEDServer](examples/Generic/ESP_AT/STM32/STM32_PWM_LEDServer)
 
 ---
 
 ### E. For WT32_ETH01 boards
 
-28. [SimpleServer_WT32_ETH01](examples/WT32_ETH01/SimpleServer_WT32_ETH01)
-29. [PWM_LEDServer_WT32_ETH01](examples/WT32_ETH01/PWM_LEDServer_WT32_ETH01)
+29. [SimpleServer_WT32_ETH01](examples/WT32_ETH01/SimpleServer_WT32_ETH01)
+30. [PWM_LEDServer_WT32_ETH01](examples/WT32_ETH01/PWM_LEDServer_WT32_ETH01)
 
 ---
 
@@ -897,8 +905,8 @@ uPnP->printAllPortMappings();
 
 #### 1. PORTENTA_H7
 
-30. [Portenta_H7_SimpleServer](examples/Generic/WiFi/Portenta_H7/Portenta_H7_SimpleServer)
-31. [Portenta_H7_PWM_LEDServer](examples/Generic/WiFi/Portenta_H7/Portenta_H7_PWM_LEDServer)
+31. [Portenta_H7_SimpleServer](examples/Generic/WiFi/Portenta_H7/Portenta_H7_SimpleServer)
+32. [Portenta_H7_PWM_LEDServer](examples/Generic/WiFi/Portenta_H7/Portenta_H7_PWM_LEDServer)
 
 
 ---
@@ -1333,7 +1341,7 @@ Debug terminal output when running example [SAMD_SimpleServer](examples/Generic/
 
 ```
 Start SAMD_SimpleServer on SAMD_NANO_33_IOT with WiFiNINA using WiFiNINA_Generic Library
-UPnP_Generic v3.4.2
+UPnP_Generic v3.4.3
 Connecting to HueNet1
 
 IP address: 192.168.2.128
@@ -1381,7 +1389,7 @@ Debug terminal output when running example [nRF52_SimpleServer](examples/Generic
 
 ```
 Start nRF52_SimpleServer on NRF52840_FEATHER with W5x00 & Ethernet2 Library
-UPnP_Generic v3.4.2
+UPnP_Generic v3.4.3
 Try # 1
 [UPnP] IGD current port mappings:
 0.   Blynk Server                  192.168.2.110     9443   9443   TCP    0
@@ -1422,7 +1430,7 @@ Debug terminal output when running example [nRF52_SimpleServer](examples/Generic
 
 ```
 Start nRF52_SimpleServer on NRF52840_FEATHER with W5x00 & Ethernet Library
-UPnP_Generic v3.4.2
+UPnP_Generic v3.4.3
 _pinCS = 0
 W5100 init, using SS_PIN_DEFAULT = 10, new ss_pin = 10, W5100Class::ss_pin = 10
 W5100::init: W5500, SSIZE =4096
@@ -1476,7 +1484,7 @@ Debug terminal output when running example [STM32_SimpleServer](examples/Generic
 
 ```
 Start STM32_SimpleServer on NUCLEO_F767ZI with W5x00 & Ethernet2 Library
-UPnP_Generic v3.4.2
+UPnP_Generic v3.4.3
 Add Port Forwarding, Try # 1
 [UPnP] IGD current port mappings:
 0.   Blynk Server                  192.168.2.110     9443   9443   TCP    0
@@ -1519,7 +1527,7 @@ Debug terminal output when running example [SAMD_SimpleServer](examples/Generic/
 
 ```
 Start SAMD_SimpleServer on ITSYBITSY_M4 with ESP8266_AT shield
-UPnP_Generic v3.4.2
+UPnP_Generic v3.4.3
 WiFi shield init done
 
 Connected to HueNet1
@@ -1571,7 +1579,7 @@ Debug terminal output when running example [PWM_LEDServer_ESP32](examples/ESP/PW
 
 ```
 Start PWM_LEDServer_ESP32 on ESP32_DEV
-UPnP_Generic v3.4.2
+UPnP_Generic v3.4.3
 Connecting to HueNet1
 ..
 IP address: 192.168.2.82
@@ -1621,7 +1629,7 @@ Debug terminal output when running example [RP2040_PWM_LEDServer](examples/Gener
 
 ```
 Start RP2040_PWM_LEDServer on MBED NANO_RP2040_CONNECT with WiFiNINA using WiFiNINA_Generic Library
-UPnP_Generic v3.4.2
+UPnP_Generic v3.4.3
 Connecting to HueNet1
 
 IP address: 192.168.2.153
@@ -1661,7 +1669,7 @@ Debug terminal output when running example [RP2040_PWM_LEDServer](examples/Gener
 
 ```
 Start RP2040_PWM_LEDServer on RASPBERRY_PI_PICO with W5x00 using Ethernet2 Library
-UPnP_Generic v3.4.2
+UPnP_Generic v3.4.3
 Default SPI pinout:
 MOSI:19
 MISO:16
@@ -1708,7 +1716,7 @@ Debug terminal output when running example [RP2040_SimpleServer](examples/Generi
 
 ```
 Start RP2040_SimpleServer on MBED RASPBERRY_PI_PICO using W5x00 using Ethernet2 Library
-UPnP_Generic v3.4.2
+UPnP_Generic v3.4.3
 Default SPI pinout:
 MOSI:3
 MISO:4
@@ -1754,7 +1762,7 @@ Debug terminal output when running example [PWM_LEDServer_ESP32](examples/ESP/PW
 
 ```
 Start PWM_LEDServer_ESP32 on ESP32S2_DEV
-UPnP_Generic v3.4.2
+UPnP_Generic v3.4.3
 Connecting to HueNet1
 .......
 IP address: 192.168.2.190
@@ -1793,7 +1801,7 @@ Debug terminal output when running example [PWM_LEDServer_ESP32](examples/ESP/PW
 
 ```
 Start PWM_LEDServer_ESP8266 on ESP8266_NODEMCU_ESP12E
-UPnP_Generic v3.4.2
+UPnP_Generic v3.4.3
 Connecting to HueNet1
 ...........
 IP address: 192.168.2.135
@@ -1834,7 +1842,7 @@ Debug terminal output when running example [SimpleServer_WT32_ETH01](examples/WT
 Start SimpleServer_WT32_ETH01 on WT32-ETH01 with ETH_PHY_LAN8720
 WebServer_WT32_ETH01 v1.4.1
 DDNS_Generic v1.6.1
-UPnP_Generic v3.4.2
+UPnP_Generic v3.4.3
 ETH MAC: A8:03:2A:A1:61:73, IPv4: 192.168.2.232
 FULL_DUPLEX, 100Mbps
 IP address: 192.168.2.232
@@ -1918,7 +1926,7 @@ Debug terminal output when running example [Portenta_H7_SimpleServer](examples/G
 
 ```
 Start Portenta_H7_SimpleServer on PORTENTA_H7_M7 using Portenta_H7 WiFi
-UPnP_Generic v3.4.2
+UPnP_Generic v3.4.3
 Connecting to HueNet1
 
 IP address: 192.168.2.130
@@ -1956,7 +1964,7 @@ Debug terminal output when running example [Portenta_H7_SimpleServer](examples/G
 
 ```
 Start Portenta_H7_SimpleServer on PORTENTA_H7_M7 using Ethernet using Portenta_Ethernet Library
-UPnP_Generic v3.4.2
+UPnP_Generic v3.4.3
 Add Port Forwarding, Try # 1
 [UPnP] IGD current port mappings:
 0.   Blynk Server                  192.168.2.110     9443   9443   TCP    0      
@@ -1980,6 +1988,88 @@ Connected
 DDNSGeneric - IP Change Detected: oldIP = , newIP = aaa.bbb.ccc.ddd
 [DDNS] Updated IP = aaa.bbb.ccc.ddd
 ```
+
+---
+
+#### 15. T41_QNEthernet_SimpleServer on TEENSY 4.1
+
+Debug terminal output when running example [T41_QNEthernet_SimpleServer](examples/Generic/Ethernet/QNEthernet/T41_QNEthernet_SimpleServer) on Teensy 4.1 using built-in Ethernet with QNEthernet Library
+
+
+```
+Start T41_QNEthernet_SimpleServer on TEENSY 4.1
+UPnP_Generic v3.4.3
+IP Address = 192.168.2.123
+[UPnP] UDP_TX_PACKET_MAX_SIZE= 1000
+[UPnP] UDP_TX_RESPONSE_MAX_SIZE= 8192
+[UPnP] newUpnpRule= 0.0.0.0
+Add Port Forwarding, Try # 1
+[UPnP] Internet connection GOOD
+[UPnP] isGatewayInfoValid : 0.0.0.0 , port : 0
+[UPnP] Path :  , actionPort : 0
+[UPnP] actionPath :  , serviceTypeName : 
+[UPnP] Gateway info not valid
+
+[UPnP] GW IP = 192.168.2.1
+[UPnP] Sending M-SEARCH to : 239.255.255.250 , Port : 1900
+[UPnP] Received packet, size = 331 , IP = 192.168.2.1
+[UPnP] Port = 1900
+[UPnP] IGD found
+[UPnP] IGD location found : http://192.168.2.1:5431/dyndev/uuid:23a5ccd0-54ea-4ff8-9607-26c3b838e44c
+[UPnP] 192.168.2.1
+[UPnP] 5431
+[UPnP] /dyndev/uuid:23a5ccd0-54ea-4ff8-9607-26c3b838e44c
+[UPnP] Connecting to IGD with host : 192.168.2.1 , port : 5431
+[UPnP] Connected to IGD
+[UPnP] called getIGDEventURLs
+[UPnP] deviceInfo->actionPath :  , deviceInfo->path : /dyndev/uuid:23a5ccd0-54ea-4ff8-9607-26c3b838e44c
+[UPnP] URLBase tag found : http://192.168.2.1:5431/
+[UPnP] Translated to base host : 192.168.2.1  and base port : 5431
+[UPnP] urn:schemas-upnp-org:service:WANPPPConnection:1 service found!
+[UPnP] controlURL tag found! Setting actionPath to : /uuid:3e3d865a-8e93-453c-998d-0049f6ff26f5/WANPPPConnection:1
+[UPnP] Port : 5431 , actionPort : 5431
+[UPnP] isGatewayInfoValid : 192.168.2.1 , port : 5431
+[UPnP] Path : /dyndev/uuid:23a5ccd0-54ea-4ff8-9607-26c3b838e44c , actionPort : 5431
+[UPnP] actionPath : /uuid:3e3d865a-8e93-453c-998d-0049f6ff26f5/WANPPPConnection:1 , serviceTypeName : urn:schemas-upnp-org:service:WANPPPConnection:1
+[UPnP] Gateway info valid
+[UPnP] Verify port mapping for rule : T41-QNEth
+[UPnP] Apply action : GetSpecificPortMappingEntry  on port mapping : T41-QNEth
+[UPnP] Connecting to IGD with host : 192.168.2.1 , port : 5431
+[UPnP] Connected to IGD
+[UPnP] Host: 192.168.2.1:5431
+[UPnP] Port mapping found in IGD
+[UPnP] All port mappings found in IGD, doing nothing
+[UPnP] isGatewayInfoValid : 192.168.2.1 , port : 5431
+[UPnP] Path : /dyndev/uuid:23a5ccd0-54ea-4ff8-9607-26c3b838e44c , actionPort : 5431
+[UPnP] actionPath : /uuid:3e3d865a-8e93-453c-998d-0049f6ff26f5/WANPPPConnection:1 , serviceTypeName : urn:schemas-upnp-org:service:WANPPPConnection:1
+[UPnP] Gateway info valid
+[UPnP] Connecting to IGD with host : 192.168.2.1 , port : 5431
+[UPnP] Connected to IGD
+[UPnP] IGD current port mappings:
+0.   Blynk Server                  192.168.2.110     9443   9443   TCP    0      
+1.   Blynk WebServer               192.168.2.110     80     80     TCP    0      
+2.   Blynk Hardware Server         192.168.2.110     8080   8080   TCP    0      
+3.   Blynk Server                  192.168.2.110     9443   1443   TCP    0      
+4.   Blynk Secondary Server        192.168.2.112     9443   2443   TCP    0      
+5.   Blynk Sec. Hardware Server    192.168.2.112     8080   1080   TCP    0      
+6.   Blynk Server SSL              192.168.2.110     9443   443    TCP    0      
+7.   MariaDB / MySQL               192.168.2.112     5698   5698   TCP    0      
+8.   MariaDB / MySQL               192.168.2.112     3306   3306   TCP    0      
+9.   Portenta_H7-ETH               192.168.2.123     6032   6032   TCP    34890  
+
+UPnP done
+HTTP EthernetWebServer is @ IP : 192.168.2.123, port = 6032
+[DDNS] Access ifconfig.me
+Connected
+[DDNS] httpCode = 200
+HttpClient::responseBody => bodyLength =-1
+[DDNS] Current Public IP = aaa.bbb.ccc.ddd
+[DDNS] response = aaa.bbb.ccc.ddd
+Connected
+DDNSGeneric - IP Change Detected: oldIP = , newIP = aaa.bbb.ccc.ddd
+[DDNS] Updated IP = aaa.bbb.ccc.ddd
+```
+
 
 ---
 ---

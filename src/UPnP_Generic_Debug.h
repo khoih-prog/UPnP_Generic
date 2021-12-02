@@ -10,7 +10,7 @@
   Based on and modified from Ofek Pearl's TinyUPnP Library (https://github.com/ofekp/TinyUPnP)
   Built by Khoi Hoang https://github.com/khoih-prog/UPnP_Generic
   Licensed under GPL-3.0 license
-  Version: 3.4.2
+  Version: 3.4.3
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
@@ -21,6 +21,7 @@
   3.4.0  K Hoang      16/09/2021 Add support to Portenta_H7, using either WiFi or Vision-shield Ethernet
   3.4.1  K Hoang      12/10/2021 Update `platform.ini` and `library.json`
   3.4.2  K Hoang      01/12/2021 Auto detect ESP32 core version. Fix bug in examples for WT32_ETH01
+  3.4.3  K Hoang      01/12/2021 Add support to Teensy 4.1, using QNEthernet
  *****************************************************************************************************************************/
 
 #ifndef UPnP_Generic_Debug_H

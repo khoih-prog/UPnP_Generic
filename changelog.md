@@ -12,6 +12,7 @@
 ## Table of Contents
 
 * [Changelog](#changelog)
+  * [Releases v3.4.3](#releases-v343)
   * [Releases v3.4.2](#releases-v342)
   * [Releases v3.4.1](#releases-v341)
   * [Major Releases v3.4.0](#major-releases-v340)
@@ -24,6 +25,10 @@
 ---
        
 ## Changelog
+
+### Releases v3.4.3
+
+1. Add support to Teensy 4.1, using QNEthernet v0.10.0+
 
 ### Releases v3.4.2
 
