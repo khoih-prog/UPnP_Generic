@@ -2046,6 +2046,7 @@ Add Port Forwarding, Try # 1
 [UPnP] Connecting to IGD with host : 192.168.2.1 , port : 5431
 [UPnP] Connected to IGD
 [UPnP] IGD current port mappings:
+
 0.   Blynk Server                  192.168.2.110     9443   9443   TCP    0      
 1.   Blynk WebServer               192.168.2.110     80     80     TCP    0      
 2.   Blynk Hardware Server         192.168.2.110     8080   8080   TCP    0      
@@ -2055,7 +2056,7 @@ Add Port Forwarding, Try # 1
 6.   Blynk Server SSL              192.168.2.110     9443   443    TCP    0      
 7.   MariaDB / MySQL               192.168.2.112     5698   5698   TCP    0      
 8.   MariaDB / MySQL               192.168.2.112     3306   3306   TCP    0      
-9.   Portenta_H7-ETH               192.168.2.123     6032   6032   TCP    34890  
+9.   T41-QNEth                     192.168.2.123     6032   6032   TCP    35355
 
 UPnP done
 HTTP EthernetWebServer is @ IP : 192.168.2.123, port = 6032
