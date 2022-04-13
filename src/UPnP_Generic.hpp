@@ -1,5 +1,5 @@
 /****************************************************************************************************************************
-  UPnP_Generic.h
+  UPnP_Generic.hpp
   
   For all Generic boards such as ESP8266, ESP32, WT32_ETH01, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1,Teensy, Portenta_H7
   with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266/ESP32-AT, W5x00, ENC28J60, Native-Ethernet, Portenta Ethernet/WiFi
@@ -26,24 +26,17 @@
   3.5.0  K Hoang      13/04/2021 Use Ethernet_Generic library as default. Support SPI1/SPI2 for RP2040/ESP32
  *****************************************************************************************************************************/
 
-#ifndef UPnP_Generic_h
-#define UPnP_Generic_h
+#ifndef UPnP_Generic_hpp
+#define UPnP_Generic_hpp
 
 #include "UPnP_Generic_Debug.h"
 
 /////////////////////////////////////////////////////////////////////
 
-#define UPNP_GENERIC_VERSION             "UPnP_Generic v3.5.0"
+#if UPNP_USING_ETHERNET
+  #include "UPnP_Generic_Ethernet.h"
+#elif (ESP8266 || ESP32 || UPNP_USING_WIFI || UPNP_USING_WT32_ETH01)
+  #include "UPnP_Generic_WiFi.h"
+#endif
 
-#define UPNP_GENERIC_VERSION_MAJOR       3
-#define UPNP_GENERIC_VERSION_MINOR       5
-#define UPNP_GENERIC_VERSION_PATCH       0
-
-#define UPNP_GENERIC_VERSION_INT        3005000
-
-/////////////////////////////////////////////////////////////////////
-
-#include "UPnP_Generic.hpp"
-#include "UPnP_Generic_Impl.h"
-
-#endif    // UPnP_Generic_h
+#endif    // UPnP_Generic_hpp

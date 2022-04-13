@@ -10,7 +10,8 @@
   Based on and modified from Ofek Pearl's TinyUPnP Library (https://github.com/ofekp/TinyUPnP)
   Built by Khoi Hoang https://github.com/khoih-prog/UPnP_Generic
   Licensed under GPL-3.0 license
-  Version: 3.4.3
+  
+  Version: 3.5.0
   
   Version Modified By   Date      Comments
   ------- -----------  ---------- -----------
@@ -22,12 +23,17 @@
   3.4.1  K Hoang      12/10/2021 Update `platform.ini` and `library.json`
   3.4.2  K Hoang      01/12/2021 Auto detect ESP32 core version. Fix bug in examples for WT32_ETH01
   3.4.3  K Hoang      01/12/2021 Add support to Teensy 4.1, using QNEthernet
+  3.5.0  K Hoang      13/04/2021 Use Ethernet_Generic library as default. Support SPI1/SPI2 for RP2040/ESP32
  *****************************************************************************************************************************/
 
 #ifndef UPnP_Generic_Impl_h
 #define UPnP_Generic_Impl_h
 
 #include <Arduino.h>
+
+#include "UPnP_Generic_Debug.h"
+
+#include "UPnP_Generic.hpp"
 
 IPAddress ipMulti(239, 255, 255, 250);            // multicast address for SSDP
 IPAddress connectivityTestIp(64, 233, 187, 99);   // Google
@@ -807,7 +813,10 @@ bool UPnP::connectUDP()
 
 #if UPNP_USING_ETHERNET
   #if USE_BUILTIN_ETHERNET
-    #warning Using LAN8742A Ethernet and STM32Ethernet Lib in UPnP
+    #if (_UPNP_LOGLEVEL_ > 3)
+      #warning Using LAN8742A Ethernet and STM32Ethernet Lib in UPnP
+    #endif
+    
     // For STM32 built-in LAN8742A Ethernet using STM32Ethernet Lib
     // initialize, start listening on specified port. IPAddress here must be local, not ipMulti address
     // virtual uint8_t beginMulticast(IPAddress, uint16_t);
@@ -885,14 +894,20 @@ void UPnP::broadcastMSearch()
   strcat_P(body_tmp, PSTR("MAN: \"ssdp:discover\"\r\n"));
   strcat_P(body_tmp, PSTR("MX: 5\r\n"));
   strcat_P(body_tmp, PSTR("ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1\r\n\r\n"));
-  #warning Using FlashString in UPnP
+  
+  #if (_UPNP_LOGLEVEL_ > 3)
+    #warning Using FlashString in UPnP
+  #endif
 #else
   strcpy(body_tmp, "M-SEARCH * HTTP/1.1\r\n");
   strcat(body_tmp, "HOST: 239.255.255.250:1900\r\n");
   strcat(body_tmp, "MAN: \"ssdp:discover\"\r\n");
   strcat(body_tmp, "MX: 5\r\n");
   strcat(body_tmp, "ST: urn:schemas-upnp-org:device:InternetGatewayDevice:1\r\n\r\n");
-  #warning Not using FlashString in UPnP
+  
+  #if (_UPNP_LOGLEVEL_ > 3)
+    #warning Not using FlashString in UPnP
+  #endif
 #endif
 
 // KH, To check

@@ -12,7 +12,7 @@
 ## Table of Contents
 
 * [Changelog](#changelog)
-  * [Releases v3.4.3](#releases-v343)
+  * [Releases v3.5.0](#releases-v350)
   * [Releases v3.4.2](#releases-v342)
   * [Releases v3.4.1](#releases-v341)
   * [Major Releases v3.4.0](#major-releases-v340)
@@ -25,6 +25,16 @@
 ---
        
 ## Changelog
+
+### Releases v3.5.0
+
+1. Use new [Ethernet_Generic library](https://github.com/khoih-prog/Ethernet_Generic) as default for W5x00.
+2. Rewrite to avoid `multiple-definitions` linker error for multiple-file project
+3. Add example [multiFileProject_Ethernet](examples/Generic/Ethernet/multiFileProject_Ethernet) and [multiFileProject_WiFiNINA](examples/Generic/WiFiNINA/multiFileProject_WiFiNINA) to demo how to avoid `multiple-definitions` linker error for multiple-file project
+4. Add support to SPI1 for RP2040 using [arduino-pico core](https://github.com/earlephilhower/arduino-pico)
+5. Add support SPI2 for ESP32
+6. Rewrite all the examples to support new features
+7. Update `Packages' Patches`
 
 ### Releases v3.4.3
 

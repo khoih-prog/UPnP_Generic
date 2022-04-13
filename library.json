@@ -1,7 +1,7 @@
 {
   "name": "UPnP_Generic",
-  "version": "3.4.3",
-  "description": "Automatically add port mappings to router using UPnP SSDP for Arduino boards, running on nRF52, SAMD21/SAMD51, STM32F/L/H/G/WB/MP1, Teensy, RP2040-based, WT32_ETH01 boards, Portenta_H7, etc. besides ESP8266/ESP32, using ESP WiFi, WiFiNINA, Ethernet W5x00, LAN8720, ESP8266/ESP32 AT-command WiFi",
+  "version": "3.5.0",
+  "description": "Automatically add port mappings to router using UPnP SSDP for Arduino boards, running on nRF52, SAMD21/SAMD51, STM32F/L/H/G/WB/MP1, Teensy, RP2040-based, WT32_ETH01 boards, Portenta_H7, etc. besides ESP8266/ESP32, using ESP WiFi, WiFiNINA, Ethernet W5x00, LAN8720, ESP8266/ESP32 AT-command WiFi. Ethernet_Generic library is used as default for W5x00",
   "keywords": "uPnP, SSDP, router, port-mappings, port-forwarding, mbed, wifi, ethernet, wifinina, w5x00, communication, esp32, esp8266, samd, nrf52, stm32, nano-rp2040-connect, rp2040, wt32-eth01, Portenta-H7, rpi-pico, nano-33-iot",
   "authors": 
   [
@@ -29,19 +29,24 @@
     {
       "owner": "khoih-prog",
       "name": "WiFiNINA_Generic",
-      "version": ">=1.8.14-1",
+      "version": ">=1.8.14-3",
       "platforms": ["*"]
     },
     {
       "owner": "khoih-prog",
       "name": "EthernetWebServer",
-      "version": ">=1.7.1",
+      "version": ">=2.1.2",
       "platforms": ["*"]
     },
     {
       "owner": "khoih-prog",
+      "name": "Ethernet_Generic",
+      "version": "^2.0.1"
+    },
+    {
+      "owner": "khoih-prog",
       "name": "EthernetWebServer_STM32",
-      "version": ">=1.2.1",
+      "version": ">=1.4.0",
       "platforms": ["ststm32", "stm32"]
     },
     {
@@ -53,13 +58,13 @@
     {
       "owner": "khoih-prog",
       "name": "WiFiWebServer",
-      "version": ">=1.4.2",
+      "version": ">=1.7.0",
       "platforms": ["*"]
     },
     {
       "owner": "khoih-prog",
       "name": "ESP8266_AT_WebServer",
-      "version": ">=1.4.0",
+      "version": ">=1.5.3",
       "platforms": ["*"]
     },
     {
@@ -69,8 +74,10 @@
       "platforms": ["*"]
     },
     {
+      "owner": "ssilverman",
       "name": "QNEthernet",
-      "version": "https://github.com/ssilverman/QNEthernet"
+      "version": ">=0.14.0",
+      "platforms": ["teensy"]
     }
   ],
   "frameworks": "*",
