@@ -84,5 +84,5 @@
   "platforms": "*",  
   "license": "GPL-3.0-or-later",
   "examples": "examples/*/*/*.ino",
-  "headers": ["UPnP_Generic.h"]
+  "headers": ["UPnP_Generic.h", "UPnP_Generic.hpp"]
 }

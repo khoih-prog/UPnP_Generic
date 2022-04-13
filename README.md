@@ -79,11 +79,14 @@
     * [3. SAMD](#3-samd)
     * [4. STM32](#4-STM32)
     * [5. PORTENTA_H7](#5-PORTENTA_H7)
+    * [6. TEENSY_4.1](#6-TEENSY_41)
+    * [7. General](#7-General)
   * [C. For WiFiNINA shields](#c-for-wifinina-shields)
     * [1. nRF52](#1-nrf52-1)
     * [2. RP2040](#2-rp2040-1)
     * [3. SAMD](#3-samd-1)
     * [4. STM32](#4-STM32-1)
+    * [5. General](#5-General)
   * [D. For ESP8266-AT/ESP32-AT shields](#d-for-esp8266-atesp32-at-shields)
     * [1. nRF52](#1-nrf52-2)
     * [2. SAMD](#2-samd-2)
@@ -614,6 +617,30 @@ To fix [`ESP32 compile error`](https://github.com/espressif/arduino-esp32), just
 
 Check if you need to install the UIPEthernet patch [new STM32 core F3/F4 compatibility](https://github.com/UIPEthernet/UIPEthernet/commit/c6d6519a260166b722b9cee5dd1f0fb2682e6782) to avoid errors `#include HardwareSPI.h` on some STM32 boards (Nucleo-32 F303K8, etc.)
 
+
+---
+---
+
+
+### HOWTO Fix `Multiple Definitions` Linker Error
+
+The current library implementation, using `xyz-Impl.h` instead of standard `xyz.cpp`, possibly creates certain `Multiple Definitions` Linker error in certain use cases.
+
+You can use
+
+```
+#include <UPnP_Generic.hpp>               //https://github.com/khoih-prog/UPnP_Generic
+```
+
+in many files. But be sure to use the following `#include <NTPClient_Generic.h>` **in just 1 `.h`, `.cpp` or `.ino` file**, which must **not be included in any other file**, to avoid `Multiple Definitions` Linker Error
+
+```
+// To be included only in main(), .ino with setup() to avoid `Multiple Definitions` Linker Error
+#include <UPnP_Generic.h>                //https://github.com/khoih-prog/UPnP_Generic
+```
+
+Check examples [multiFileProject_Ethernet](examples/Generic/Ethernet/multiFileProject_Ethernet) and [multiFileProject_WiFiNINA](examples/Generic/WiFiNINA/multiFileProject_WiFiNINA) for a demo how to avoid `multiple-definitions` linker error for multiple-file project
+
 ---
 ---
 
@@ -927,7 +954,7 @@ uPnP->printAllPortMappings();
 
  1. [T41_QNEthernet_SimpleServer](examples/Generic/Ethernet/QNEthernet/T41_QNEthernet_SimpleServer) **New**
 
-#### General
+#### 7. General
 
  1. [multiFileProject_Ethernet](examples/Generic/Ethernet/multiFileProject_Ethernet) **New**
  
@@ -955,7 +982,7 @@ uPnP->printAllPortMappings();
  1. [STM32_SimpleServer](examples/Generic/WiFiNINA/STM32/STM32_SimpleServer)
  2. [STM32_PWM_LEDServer](examples/Generic/WiFiNINA/STM32/STM32_PWM_LEDServer)
 
-#### General
+#### 5. General
 
  1. [multiFileProject_WiFiNINA](examples/Generic/WiFiNINA/multiFileProject_WiFiNINA) **New**
 
