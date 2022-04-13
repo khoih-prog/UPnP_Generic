@@ -1,5 +1,5 @@
 /****************************************************************************************************************************
-  nRF52_SimpleServer.ino
+  RP2040_SimpleServer.ino
   
   For all Generic boards such as ESP8266, ESP32, WT32_ETH01, SAMD21/SAMD51, nRF52, STM32F/L/H/G/WB/MP1,Teensy, Portenta_H7
   with WiFiNINA, ESP8266/ESP32 WiFi, ESP8266/ESP32-AT, W5x00, ENC28J60, Native-Ethernet, Portenta Ethernet/WiFi
@@ -41,13 +41,15 @@ const int led = LED_PIN;
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
-  Serial.print(F("DDNSGeneric - IP Change Detected: "));
+  Serial.print(F("DDNSGeneric - IP Change Detected: oldIP = "));
+  Serial.print(oldIP);
+  Serial.print(F(", newIP = "));
   Serial.println(newIP);
 }
 
 void handleRoot()
 {
-#define BUFFER_SIZE     400
+#define BUFFER_SIZE     512
   
   digitalWrite(led, 1);
   char temp[BUFFER_SIZE];
@@ -101,78 +103,64 @@ void handleNotFound()
   digitalWrite(led, 0);
 }
 
-void setup(void) 
+void initEthernet()
 {
-  pinMode(led, OUTPUT);
-  digitalWrite(led, 0);
-  
-  Serial.begin(115200);
-  while (!Serial);
-
-  Serial.print("\nStart RP2040_SimpleServer on "); Serial.print(BOARD_NAME);
-  Serial.print(" using "); Serial.println(SHIELD_TYPE);
-  Serial.println(UPNP_GENERIC_VERSION);
-  
-  ET_LOGERROR3(F("Board :"), BOARD_NAME, F(", setCsPin:"), USE_THIS_SS_PIN);
-
-  Serial.println(F("Default SPI pinout:"));
-  Serial.print(F("MOSI:")); Serial.println(MOSI);
-  Serial.print(F("MISO:")); Serial.println(MISO);
-  Serial.print(F("SCK:"));  Serial.println(SCK);
-  Serial.print(F("SS:"));   Serial.println(SS);
-  Serial.println(F("========================="));
-      
-#if !(USE_BUILTIN_ETHERNET || USE_UIP_ETHERNET)
-  // For other boards, to change if necessary
-  pinMode(USE_THIS_SS_PIN, OUTPUT);
-  digitalWrite(USE_THIS_SS_PIN, HIGH);
-  
-  // ETHERNET_USE_RPIPICO, use default SS = 5 or 17
-  #ifndef USE_THIS_SS_PIN
-    #if defined(ARDUINO_ARCH_MBED)
-      #define USE_THIS_SS_PIN   5     // For Arduino Mbed core
-    #else  
-      #define USE_THIS_SS_PIN   17    // For E.Philhower core
-    #endif
-  #endif
-
-  ET_LOGWARN1(F("RPIPICO setCsPin:"), USE_THIS_SS_PIN);
-
-  // For other boards, to change if necessary
-  #if ( USE_ETHERNET || USE_ETHERNET_LARGE || USE_ETHERNET2 || USE_ETHERNET_ENC )
-    // Must use library patch for Ethernet, EthernetLarge libraries
-    // For RPI Pico using Arduino Mbed RP2040 core
-    // SCK: GPIO2,  MOSI: GPIO3, MISO: GPIO4, SS/CS: GPIO5
-    // For RPI Pico using E. Philhower RP2040 core
-    // SCK: GPIO18,  MOSI: GPIO19, MISO: GPIO16, SS/CS: GPIO17
-    // Default pin 5/17 to SS/CS
-  
-    //Ethernet.setCsPin (USE_THIS_SS_PIN);
-    Ethernet.init (USE_THIS_SS_PIN);
-  
-  #elif USE_ETHERNET3
-    // Use  MAX_SOCK_NUM = 4 for 4K, 2 for 8K, 1 for 16K RX/TX buffer
-    #ifndef ETHERNET3_MAX_SOCK_NUM
-      #define ETHERNET3_MAX_SOCK_NUM      4
-    #endif
-  
-    Ethernet.setCsPin (USE_THIS_SS_PIN);
-    Ethernet.init (ETHERNET3_MAX_SOCK_NUM);
-    
-  #endif    //( USE_ETHERNET || USE_ETHERNET2 || USE_ETHERNET3 || USE_ETHERNET_LARGE )
+  #if USE_ETHERNET_GENERIC
+  ET_LOGWARN(F("=========== USE_ETHERNET_GENERIC ==========="));  
+#elif USE_ETHERNET_ENC
+  ET_LOGWARN(F("=========== USE_ETHERNET_ENC ==========="));
+#elif USE_UIP_ETHERNET
+  ET_LOGWARN(F("=========== USE_UIP_ETHERNET ==========="));  
+#else
+  ET_LOGWARN(F("=========== USE_CUSTOM_ETHERNET ==========="));
 #endif
 
+  ET_LOGWARN3(F("Board :"), BOARD_NAME, F(", setCsPin:"), USE_THIS_SS_PIN);
+
+  ET_LOGWARN(F("Default SPI pinout:"));
+  ET_LOGWARN1(F("MOSI:"), MOSI);
+  ET_LOGWARN1(F("MISO:"), MISO);
+  ET_LOGWARN1(F("SCK:"),  SCK);
+  ET_LOGWARN1(F("SS:"),   SS);
+  ET_LOGWARN(F("========================="));
+
+  // For other boards, to change if necessary
+  #if ( USE_ETHERNET_GENERIC || USE_ETHERNET_ENC )
+    // Must use library patch for Ethernet, Ethernet2, EthernetLarge libraries
+    Ethernet.init (USE_THIS_SS_PIN);
+    
+  #elif USE_CUSTOM_ETHERNET
+    // You have to add initialization for your Custom Ethernet here
+    // This is just an example to setCSPin to USE_THIS_SS_PIN, and can be not correct and enough
+    //Ethernet.init(USE_THIS_SS_PIN);
+    
+  #endif  //( ( USE_ETHERNET_GENERIC || USE_ETHERNET_ENC )
+  
   // start the ethernet connection and the server:
   // Use DHCP dynamic IP and random mac
   uint16_t index = millis() % NUMBER_OF_MAC;
   // Use Static IP
   //Ethernet.begin(mac[index], ip);
   Ethernet.begin(mac[index]);
+}
+
+#define RETRY_TIMES     4
+
+void setup() 
+{
+  pinMode(led, OUTPUT);
+  digitalWrite(led, 0);
+  
+  Serial.begin(115200);
+  while (!Serial && millis() < 5000);
+
+  Serial.print("\nStart RP2040_SimpleServer on "); Serial.print(BOARD_NAME);
+  Serial.print(" using "); Serial.println(SHIELD_TYPE);
+  Serial.println(UPNP_GENERIC_VERSION);
+  
+  initEthernet();
 
   IPAddress localIP = Ethernet.localIP();
-
-  Serial.print(F("Using mac index = "));
-  Serial.println(index);
 
   Serial.print(F("Connected! IP address: "));
   Serial.println(localIP);
@@ -202,7 +190,6 @@ void setup(void)
 
     bool portMappingAdded = false;
 
-#define RETRY_TIMES     4
     int retries = 0;
 
     while (!portMappingAdded && (retries < RETRY_TIMES))
@@ -247,7 +234,7 @@ void setup(void)
   Serial.println(LISTEN_PORT);
 }
 
-void loop(void) 
+void loop() 
 {
   DDNSGeneric.update(300000);
 

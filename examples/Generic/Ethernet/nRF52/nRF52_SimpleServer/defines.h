@@ -15,132 +15,135 @@
 #ifndef defines_h
 #define defines_h
 
+#define DEBUG_ETHERNET_WEBSERVER_PORT       Serial
+
 // Debug Level from 0 to 4
 #define _DDNS_GENERIC_LOGLEVEL_     1
-#define _UPNP_LOGLEVEL_             3
+#define _UPNP_LOGLEVEL_             2
 
 // Select DDNS_USING_WIFI for boards using built-in WiFi, such as Nano-33-IoT
 #define DDNS_USING_WIFI             false
 #define DDNS_USING_ETHERNET         true
 
 /////////////////////////////////
-  
-#if !( defined(NRF52840_FEATHER) || defined(NRF52832_FEATHER) || defined(NRF52_SERIES) || defined(ARDUINO_NRF52_ADAFRUIT) || \
+
+#if ( defined(NRF52840_FEATHER) || defined(NRF52832_FEATHER) || defined(NRF52_SERIES) || defined(ARDUINO_NRF52_ADAFRUIT) || \
         defined(NRF52840_FEATHER_SENSE) || defined(NRF52840_ITSYBITSY) || defined(NRF52840_CIRCUITPLAY) || defined(NRF52840_CLUE) || \
         defined(NRF52840_METRO) || defined(NRF52840_PCA10056) || defined(PARTICLE_XENON) || defined(NINA_B302_ublox) || defined(NINA_B112_ublox) )
-
-  #error This code is intended to run on the nRF52 platform! Please check your Tools->Board setting.
-#endif
-
-/////////////////////////////////
-
-#if defined(ETHERNET_USE_NRF528XX)
-  #undef ETHERNET_USE_NRF528XX
-#endif
-
-#define ETHERNET_USE_NRF528XX          true
-#warning Use NRF52 architecture with Ethernet   
-
-// Default pin 10 to SS/CS
-#define USE_THIS_SS_PIN       10
-
-/////////////////////////////////
-  
-#if defined(NRF52840_FEATHER)
-  #define BOARD_TYPE      "NRF52840_FEATHER_EXPRESS"
-#elif defined(NRF52832_FEATHER)
-  #define BOARD_TYPE      "NRF52832_FEATHER"
-#elif defined(NRF52840_FEATHER_SENSE)
-  #define BOARD_TYPE      "NRF52840_FEATHER_SENSE"
-#elif defined(NRF52840_ITSYBITSY)
-  #define BOARD_TYPE      "NRF52840_ITSYBITSY_EXPRESS"
-#elif defined(NRF52840_CIRCUITPLAY)
-  #define BOARD_TYPE      "NRF52840_CIRCUIT_PLAYGROUND"
-#elif defined(NRF52840_CLUE)
-  #define BOARD_TYPE      "NRF52840_CLUE"
-#elif defined(NRF52840_METRO)
-  #define BOARD_TYPE      "NRF52840_METRO_EXPRESS"
-#elif defined(NRF52840_PCA10056)
-  #define BOARD_TYPE      "NORDIC_NRF52840DK"
-#elif defined(NINA_B302_ublox)
-  #define BOARD_TYPE      "NINA_B302_ublox"
-#elif defined(NINA_B112_ublox)
-  #define BOARD_TYPE      "NINA_B112_ublox"
-#elif defined(PARTICLE_XENON)
-  #define BOARD_TYPE      "PARTICLE_XENON"
-#elif defined(MDBT50Q_RX)
-  #define BOARD_TYPE      "RAYTAC_MDBT50Q_RX"
-#elif defined(ARDUINO_NRF52_ADAFRUIT)
-  #define BOARD_TYPE      "ARDUINO_NRF52_ADAFRUIT"
+  #if defined(ETHERNET_USE_NRF528XX)
+    #undef ETHERNET_USE_NRF528XX
+  #endif
+  #define ETHERNET_USE_NRF528XX      true
 #else
-  #define BOARD_TYPE      "nRF52 Unknown"
+  #error For Adafruit nRF52 only.
 #endif
 
+#if (ETHERNET_USE_NRF528XX)
+  // Default pin 10 to SS/CS
+  #define USE_THIS_SS_PIN       10
 
-///////////////////////////////////////////
-// Select Ethernet Library for the Shield
-///////////////////////////////////////////
+  #if defined(NRF52840_FEATHER)
+    #define BOARD_TYPE      "NRF52840_FEATHER"
+  #elif defined(NRF52832_FEATHER)
+    #define BOARD_TYPE      "NRF52832_FEATHER"
+  #elif defined(NRF52840_FEATHER_SENSE)
+    #define BOARD_TYPE      "NRF52840_FEATHER_SENSE"
+  #elif defined(NRF52840_ITSYBITSY)
+    #define BOARD_TYPE      "NRF52840_ITSYBITSY"
+    #define USE_THIS_SS_PIN   10    // For other boards
+  #elif defined(NRF52840_CIRCUITPLAY)
+    #define BOARD_TYPE      "NRF52840_CIRCUITPLAY"
+  #elif defined(NRF52840_CLUE)
+    #define BOARD_TYPE      "NRF52840_CLUE"
+  #elif defined(NRF52840_METRO)
+    #define BOARD_TYPE      "NRF52840_METRO"
+  #elif defined(NRF52840_PCA10056)
+    #define BOARD_TYPE      "NRF52840_PCA10056"
+  #elif defined(NINA_B302_ublox)
+    #define BOARD_TYPE      "NINA_B302_ublox"
+  #elif defined(NINA_B112_ublox)
+    #define BOARD_TYPE      "NINA_B112_ublox"
+  #elif defined(PARTICLE_XENON)
+    #define BOARD_TYPE      "PARTICLE_XENON"
+  #elif defined(ARDUINO_NRF52_ADAFRUIT)
+    #define BOARD_TYPE      "ARDUINO_NRF52_ADAFRUIT"
+  #else
+    #define BOARD_TYPE      "nRF52 Unknown"
+  #endif
+  
+#endif
 
-#define USE_UIP_ETHERNET        false
-#define USE_CUSTOM_ETHERNET     false
+#ifndef BOARD_NAME
+  #define BOARD_NAME    BOARD_TYPE
+#endif
+
+#include <SPI.h>
+
+// To override the default CS/SS pin. Don't use unless you know exactly which pin to use
+// You can define here or customize for each board at same place with BOARD_TYPE
+// Check @ defined(SEEED_XIAO_M0)
+//#define USE_THIS_SS_PIN   22  //21  //5 //4 //2 //15
 
 // Only one if the following to be true
-#define USE_ETHERNET            false
-#define USE_ETHERNET2           true //true
-#define USE_ETHERNET3           false //true
-#define USE_ETHERNET_LARGE      false
-#define USE_ETHERNET_ESP8266    false //true
-#define USE_ETHERNET_ENC        false
-
-#if ( USE_ETHERNET2 || USE_ETHERNET3 || USE_ETHERNET_LARGE || USE_ETHERNET_ESP8266 || USE_ETHERNET_ENC )
+#define USE_ETHERNET_GENERIC  true
+#define USE_ETHERNET_ESP8266  false 
+#define USE_ETHERNET_ENC      false
+#define USE_UIP_ETHERNET      false
+#define USE_CUSTOM_ETHERNET   false
+  
+  ////////////////////////////
+  
+#if ( USE_ETHERNET_GENERIC || USE_ETHERNET_ENC || USE_UIP_ETHERNET )
   #ifdef USE_CUSTOM_ETHERNET
     #undef USE_CUSTOM_ETHERNET
-    #define USE_CUSTOM_ETHERNET   false //true
   #endif
+  #define USE_CUSTOM_ETHERNET   false
 #endif
 
-// Currently, only Ethernet lib available for STM32 using W5x00
-#if !(USE_BUILTIN_ETHERNET || ETHERNET_USE_STM32)
-  #if USE_ETHERNET3
-    #include "Ethernet3.h"
-    #warning Use Ethernet3 lib
-    #define SHIELD_TYPE           "W5x00 using Ethernet3 Library"
-  #elif USE_ETHERNET2
-    #include "Ethernet2.h"
-    #warning Use Ethernet2 lib
-    #define SHIELD_TYPE           "W5x00 using Ethernet2 Library"
-  #elif USE_ETHERNET_LARGE
-    #include "EthernetLarge.h"
-    #warning Use EthernetLarge lib
-    #define SHIELD_TYPE           "W5x00 using EthernetLarge Library"
-  #elif USE_ETHERNET_ESP8266
-    #include "Ethernet_ESP8266.h"
-    #warning Use Ethernet_ESP8266 lib
-    #define SHIELD_TYPE           "W5x00 using Ethernet_ESP8266 Library"
-  #elif USE_ETHERNET_ENC
-    #include "EthernetENC.h"
-    #warning Use EthernetENC lib
-    #define SHIELD_TYPE           "ENC28J60 using EthernetENC Library"  
-  #elif USE_CUSTOM_ETHERNET
-    #include "Ethernet_XYZ.h"
-    #warning Use Custom Ethernet library from EthernetWrapper. You must include a library here or error.
-    #define SHIELD_TYPE           "using Custom Ethernet Library"
-  #elif USE_UIP_ETHERNET
+#if USE_ETHERNET_GENERIC
+
+  #define SHIELD_TYPE           "W5x00 using Ethernet_Generic Library on SPI0/SPI"
+
+  #define ETHERNET_LARGE_BUFFERS
+
+  #define _ETG_LOGLEVEL_                      1
+  
+  #include "Ethernet_Generic.h"
+  #warning Using Ethernet_Generic lib
+
+#elif USE_ETHERNET_ENC
+  #include "EthernetENC.h"
+  #warning Using EthernetENC lib
+  #define SHIELD_TYPE           "ENC28J60 using EthernetENC Library"
+  
+#elif USE_CUSTOM_ETHERNET
+  //#include "Ethernet_XYZ.h"
+  #include "Ethernet.h"
+  #warning Using Custom Ethernet library. You must include a library and initialize.
+  #define SHIELD_TYPE           "Custom Ethernet using Ethernet Library"
+  
+#elif USE_UIP_ETHERNET
     #include "UIPEthernet.h"
-    #warning Use UIPEthernet library
-    #define SHIELD_TYPE           "ENC28J60 using UIPEthernet Library"
-  #else
-    #ifdef USE_ETHERNET
-      #undef USE_ETHERNET
-    #endif
-    #define USE_ETHERNET          true
-    #include "Ethernet.h"
-    #warning Use Ethernet lib
-    #define SHIELD_TYPE           "W5x00 using Ethernet Library"
-  #endif
-#endif
+    #warning Using UIPEthernet library
+    #define SHIELD_TYPE           "ENC28J60 using UIPEthernet Library"  
+    
+#else
+  #ifdef USE_ETHERNET_GENERIC
+    #undef USE_ETHERNET_GENERIC
+  #endif  
+  #define USE_ETHERNET_GENERIC   true
+  
+  #include "Ethernet_Generic.h"
+  #warning Using default Ethernet_Generic lib
+  #define SHIELD_TYPE           "W5x00 using default Ethernet_Generic Library"
 
-/////////////////////////////////
+// Ethernet_Shield_W5200, EtherCard, EtherSia not supported
+// Select just 1 of the following #include if uncomment #define USE_CUSTOM_ETHERNET
+// Otherwise, standard Ethernet library will be used for W5x00
+  
+  ////////////////////////////
+
+#endif      // #if USE_ETHERNET_GENERIC
 
 /////////////////////////////////
 

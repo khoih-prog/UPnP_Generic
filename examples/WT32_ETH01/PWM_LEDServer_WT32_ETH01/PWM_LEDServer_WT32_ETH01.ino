@@ -69,9 +69,9 @@ const int delayval = 10;
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
-  (void) oldIP;
-  
-  Serial.print(F("DDNSGeneric - IP Change Detected: "));
+  Serial.print(F("DDNSGeneric - IP Change Detected: oldIP = "));
+  Serial.print(oldIP);
+  Serial.print(F(", newIP = "));
   Serial.println(newIP);
 }
 
@@ -88,7 +88,7 @@ void setPower(uint32_t percentage)
   ledcWrite(ledChannel, pwm_val);
 }
 
-void fadeOn(void)
+void fadeOn()
 {
 #if LED_REVERSED  
   for (int i = 100; i >= 0; i--)
@@ -101,7 +101,7 @@ void fadeOn(void)
   }
 }
 
-void fadeOff(void)
+void fadeOff()
 {
 #if LED_REVERSED  
   for (int i = 0; i < 100; i++)
@@ -114,7 +114,7 @@ void fadeOff(void)
   }
 }
 
-void showLED(void)
+void showLED()
 {
   for (int i = 0; i < 2; i++)
   {  
@@ -173,10 +173,10 @@ void handleNotFound()
   server.send(404, F("text/plain"), message);
 }
 
-void setup(void) 
+void setup() 
 { 
   Serial.begin(115200);
-  while (!Serial);
+  while (!Serial && millis() < 5000);
 
 #if ( ARDUINO_ESP32S2_DEV || ARDUINO_FEATHERS2 || ARDUINO_ESP32S2_THING_PLUS || ARDUINO_MICROS2 || \
         ARDUINO_METRO_ESP32S2 || ARDUINO_MAGTAG29_ESP32S2 || ARDUINO_FUNHOUSE_ESP32S2 || \
@@ -298,7 +298,7 @@ void setup(void)
   Serial.println(ETH.subnetMask());
 }
 
-void loop(void) 
+void loop() 
 {
   //delay(100);
   

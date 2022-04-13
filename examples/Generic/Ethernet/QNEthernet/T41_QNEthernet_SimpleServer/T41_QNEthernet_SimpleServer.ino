@@ -98,7 +98,7 @@ void handleNotFound()
   digitalWrite(led, 0);
 }
 
-void setup(void)
+void setup()
 {
   pinMode(led, OUTPUT);
   digitalWrite(led, 0);
@@ -132,11 +132,15 @@ void setup(void)
       delay(1);
     }
   }
+
+  if (!Ethernet.waitForLink(5000))
+  {
+    Serial.println(F("Failed to wait for Link"));
+  }
   else
   {
     localIP = Ethernet.localIP();
-
-
+    
     Serial.print("IP Address = ");
     Serial.println(Ethernet.localIP());
   }
@@ -211,7 +215,7 @@ void setup(void)
   Serial.println(LISTEN_PORT);
 }
 
-void loop(void)
+void loop()
 {
   DDNSGeneric.update(300000);
 

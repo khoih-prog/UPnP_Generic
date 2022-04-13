@@ -48,9 +48,9 @@ ESP8266WebServer server(LISTEN_PORT);
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
-  (void) oldIP;
-  
-  Serial.print(F("DDNSGeneric - IP Change Detected: "));
+  Serial.print(F("DDNSGeneric - IP Change Detected: oldIP = "));
+  Serial.print(oldIP);
+  Serial.print(F(", newIP = "));
   Serial.println(newIP);
 }
 
@@ -109,13 +109,13 @@ void handleNotFound()
   digitalWrite(LED_BUILTIN, 0);
 }
 
-void setup(void) 
+void setup()
 {
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, 0);
   
   Serial.begin(115200);
-  while (!Serial);
+  while (!Serial && millis() < 5000);
 
   Serial.print("\nStart SimpleServerESP8266 on "); Serial.println(ARDUINO_BOARD);
   Serial.println(UPNP_GENERIC_VERSION);
@@ -217,7 +217,7 @@ void setup(void)
   Serial.println(WiFi.subnetMask());
 }
 
-void loop(void) 
+void loop() 
 {
   DDNSGeneric.update(555000);
 

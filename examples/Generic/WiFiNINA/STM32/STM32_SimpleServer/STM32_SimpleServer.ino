@@ -37,7 +37,9 @@ int status    = WL_IDLE_STATUS;     // the Wifi radio's status
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
-  Serial.print(F("DDNSGeneric - IP Change Detected: "));
+  Serial.print(F("DDNSGeneric - IP Change Detected: oldIP = "));
+  Serial.print(oldIP);
+  Serial.print(F(", newIP = "));
   Serial.println(newIP);
 }
 
@@ -97,13 +99,13 @@ void handleNotFound()
   digitalWrite(led, 0);
 }
 
-void setup(void) 
+void setup() 
 {
   pinMode(led, OUTPUT);
   digitalWrite(led, 0);
   
   Serial.begin(115200);
-  while (!Serial);
+  while (!Serial && millis() < 5000);
 
   Serial.print("\nStart STM32_SimpleServer on "); Serial.print(BOARD_NAME);
   Serial.print(" using "); Serial.println(SHIELD_TYPE);
@@ -220,7 +222,7 @@ void setup(void)
   Serial.println(LISTEN_PORT);
 }
 
-void loop(void) 
+void loop() 
 {
   DDNSGeneric.update(300000);
 

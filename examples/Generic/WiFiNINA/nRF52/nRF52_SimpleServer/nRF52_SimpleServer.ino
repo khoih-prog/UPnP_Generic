@@ -104,13 +104,13 @@ void handleNotFound()
   digitalWrite(led, 0);
 }
 
-void setup(void) 
+void setup() 
 {
   pinMode(led, OUTPUT);
   digitalWrite(led, 0);
   
   Serial.begin(115200);
-  while (!Serial);
+  while (!Serial && millis() < 5000);
 
   Serial.print("\nStart nRF52_SimpleServer on "); Serial.print(BOARD_NAME);
   Serial.print(" using "); Serial.println(SHIELD_TYPE);
@@ -227,7 +227,7 @@ void setup(void)
   Serial.println(LISTEN_PORT);
 }
 
-void loop(void) 
+void loop() 
 {
   DDNSGeneric.update(300000);
 

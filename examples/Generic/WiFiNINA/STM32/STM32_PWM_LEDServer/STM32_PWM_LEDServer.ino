@@ -44,7 +44,9 @@ const int delayval = 10;
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
-  Serial.print(F("DDNSGeneric - IP Change Detected: "));
+  Serial.print(F("DDNSGeneric - IP Change Detected: oldIP = "));
+  Serial.print(oldIP);
+  Serial.print(F(", newIP = "));
   Serial.println(newIP);
 }
 
@@ -61,7 +63,7 @@ void setPower(uint32_t percentage)
   analogWrite(LED_PIN, pwm_val);
 }
 
-void fadeOn(void)
+void fadeOn()
 {
 #if LED_REVERSED  
   for (int i = 100; i >= 0; i--)
@@ -74,7 +76,7 @@ void fadeOn(void)
   }
 }
 
-void fadeOff(void)
+void fadeOff()
 {
 #if LED_REVERSED  
   for (int i = 0; i < 100; i++)
@@ -87,7 +89,7 @@ void fadeOff(void)
   }
 }
 
-void showLED(void)
+void showLED()
 {
   for (int i = 0; i < 2; i++)
   {  
@@ -147,10 +149,10 @@ void handleNotFound()
   server.send(404, F("text/plain"), message);
 }
 
-void setup(void) 
+void setup() 
 { 
   Serial.begin(115200);
-  while (!Serial);
+  while (!Serial && millis() < 5000);
 
   Serial.print("\nStart STM32_PWM_LEDServer on "); Serial.print(BOARD_NAME);
   Serial.print(" using "); Serial.println(SHIELD_TYPE);
@@ -273,7 +275,7 @@ void setup(void)
   Serial.println(LISTEN_PORT);
 }
 
-void loop(void) 
+void loop() 
 {
   DDNSGeneric.update(300000);
 

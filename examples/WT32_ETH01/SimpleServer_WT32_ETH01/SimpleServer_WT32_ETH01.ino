@@ -58,9 +58,9 @@ const int led = 2;     // LED_BUILTIN
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
-  (void) oldIP;
-  
-  Serial.print(F("DDNSGeneric - IP Change Detected: "));
+  Serial.print(F("DDNSGeneric - IP Change Detected: oldIP = "));
+  Serial.print(oldIP);
+  Serial.print(F(", newIP = "));
   Serial.println(newIP);
 }
 
@@ -119,13 +119,13 @@ void handleNotFound()
   digitalWrite(led, 0);
 }
 
-void setup(void) 
+void setup()
 {
   pinMode(led, OUTPUT);
   digitalWrite(led, 0);
   
   Serial.begin(115200);
-  while (!Serial);
+  while (!Serial && millis() < 5000);
 
 #if ( ARDUINO_ESP32S2_DEV || ARDUINO_FEATHERS2 || ARDUINO_ESP32S2_THING_PLUS || ARDUINO_MICROS2 || \
         ARDUINO_METRO_ESP32S2 || ARDUINO_MAGTAG29_ESP32S2 || ARDUINO_FUNHOUSE_ESP32S2 || \
@@ -237,7 +237,7 @@ void setup(void)
   Serial.println(ETH.subnetMask());
 }
 
-void loop(void) 
+void loop() 
 {
   DDNSGeneric.update(555000);
 

@@ -41,13 +41,15 @@ const int led = LED_PIN;
 
 void onUpdateCallback(const char* oldIP, const char* newIP)
 {
-  Serial.print(F("DDNSGeneric - IP Change Detected: "));
+  Serial.print(F("DDNSGeneric - IP Change Detected: oldIP = "));
+  Serial.print(oldIP);
+  Serial.print(F(", newIP = "));
   Serial.println(newIP);
 }
 
 void handleRoot()
 {
-#define BUFFER_SIZE     400
+#define BUFFER_SIZE     512
   
   digitalWrite(led, 1);
   char temp[BUFFER_SIZE];
@@ -101,18 +103,18 @@ void handleNotFound()
   digitalWrite(led, 0);
 }
 
-void setup(void) 
+void initEthernet()
 {
-  pinMode(led, OUTPUT);
-  digitalWrite(led, 0);
-  
-  Serial.begin(115200);
-  while (!Serial);
+  #if USE_ETHERNET_GENERIC
+  ET_LOGWARN(F("=========== USE_ETHERNET_GENERIC ==========="));  
+#elif USE_ETHERNET_ENC
+  ET_LOGWARN(F("=========== USE_ETHERNET_ENC ==========="));
+#elif USE_UIP_ETHERNET
+  ET_LOGWARN(F("=========== USE_UIP_ETHERNET ==========="));  
+#else
+  ET_LOGWARN(F("=========== USE_CUSTOM_ETHERNET ==========="));
+#endif
 
-  Serial.print("\nStart nRF52_SimpleServer on "); Serial.print(BOARD_NAME);
-  Serial.print(" using "); Serial.println(SHIELD_TYPE);
-  Serial.println(UPNP_GENERIC_VERSION);
-  
   ET_LOGWARN3(F("Board :"), BOARD_NAME, F(", setCsPin:"), USE_THIS_SS_PIN);
 
   ET_LOGWARN(F("Default SPI pinout:"));
@@ -122,28 +124,17 @@ void setup(void)
   ET_LOGWARN1(F("SS:"),   SS);
   ET_LOGWARN(F("========================="));
 
-  #if !(USE_BUILTIN_ETHERNET || USE_UIP_ETHERNET)
-    // For other boards, to change if necessary
-    #if ( USE_ETHERNET || USE_ETHERNET_LARGE || USE_ETHERNET2  || USE_ETHERNET_ENC )
-      // Must use library patch for Ethernet, Ethernet2, EthernetLarge libraries
-      Ethernet.init (USE_THIS_SS_PIN);
+  // For other boards, to change if necessary
+  #if ( USE_ETHERNET_GENERIC || USE_ETHERNET_ENC )
+    // Must use library patch for Ethernet, Ethernet2, EthernetLarge libraries
+    Ethernet.init (USE_THIS_SS_PIN);
     
-    #elif USE_ETHERNET3
-      // Use  MAX_SOCK_NUM = 4 for 4K, 2 for 8K, 1 for 16K RX/TX buffer
-      #ifndef ETHERNET3_MAX_SOCK_NUM
-        #define ETHERNET3_MAX_SOCK_NUM      4
-      #endif
+  #elif USE_CUSTOM_ETHERNET
+    // You have to add initialization for your Custom Ethernet here
+    // This is just an example to setCSPin to USE_THIS_SS_PIN, and can be not correct and enough
+    //Ethernet.init(USE_THIS_SS_PIN);
     
-      Ethernet.setCsPin (USE_THIS_SS_PIN);
-      Ethernet.init (ETHERNET3_MAX_SOCK_NUM);
-  
-    #elif USE_CUSTOM_ETHERNET
-      // You have to add initialization for your Custom Ethernet here
-      // This is just an example to setCSPin to USE_THIS_SS_PIN, and can be not correct and enough
-      //Ethernet.init(USE_THIS_SS_PIN);
-      
-    #endif  //( ( USE_ETHERNET || USE_ETHERNET_LARGE || USE_ETHERNET2  || USE_ETHERNET_ENC )
-  #endif
+  #endif  //( ( USE_ETHERNET_GENERIC || USE_ETHERNET_ENC )
   
   // start the ethernet connection and the server:
   // Use DHCP dynamic IP and random mac
@@ -151,8 +142,28 @@ void setup(void)
   // Use Static IP
   //Ethernet.begin(mac[index], ip);
   Ethernet.begin(mac[index]);
+}
+
+#define RETRY_TIMES     4
+
+void setup() 
+{
+  pinMode(led, OUTPUT);
+  digitalWrite(led, 0);
+  
+  Serial.begin(115200);
+  while (!Serial && millis() < 5000);
+
+  Serial.print("\nStart nRF52_SimpleServer on "); Serial.print(BOARD_NAME);
+  Serial.print(" using "); Serial.println(SHIELD_TYPE);
+  Serial.println(UPNP_GENERIC_VERSION);
+
+  initEthernet();
 
   IPAddress localIP = Ethernet.localIP();
+
+  Serial.print(F("Connected! IP address: "));
+  Serial.println(localIP);
 
   ////////////////
   
@@ -179,7 +190,6 @@ void setup(void)
 
     bool portMappingAdded = false;
 
-#define RETRY_TIMES     4
     int retries = 0;
 
     while (!portMappingAdded && (retries < RETRY_TIMES))
@@ -224,7 +234,7 @@ void setup(void)
   Serial.println(LISTEN_PORT);
 }
 
-void loop(void) 
+void loop() 
 {
   DDNSGeneric.update(300000);
 
